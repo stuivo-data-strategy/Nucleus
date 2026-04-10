@@ -3,7 +3,7 @@ import { FastifyPluginAsync } from 'fastify';
 
 const wsRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get('/', { websocket: true }, (connection, req) => {
-    connection.socket.on('message', message => {
+    connection.socket.on('message', (message: any) => {
       const msg = message.toString();
       if (msg === 'ping') connection.socket.send('pong');
     });

@@ -191,7 +191,7 @@ DEFINE TABLE IF NOT EXISTS workflow_action SCHEMALESS;
 DEFINE FIELD IF NOT EXISTS instance ON workflow_action TYPE string|record<workflow_instance>;
 DEFINE FIELD IF NOT EXISTS step ON workflow_action TYPE int;
 DEFINE FIELD IF NOT EXISTS actor ON workflow_action TYPE string|record<person>;
-DEFINE FIELD IF NOT EXISTS action ON workflow_action TYPE string ASSERT $value IN ['approve', 'reject', 'query', 'respond', 'delegate', 'escalate', 'cancel', 'resubmit'];
+DEFINE FIELD IF NOT EXISTS action ON workflow_action TYPE string ASSERT $value IN ['created', 'approve', 'reject', 'query', 'respond', 'delegate', 'escalate', 'cancel', 'resubmit'];
 DEFINE FIELD IF NOT EXISTS note ON workflow_action TYPE option<string>;
 DEFINE FIELD IF NOT EXISTS created_at ON workflow_action TYPE datetime DEFAULT time::now();
 DEFINE INDEX IF NOT EXISTS idx_wf_action_instance ON workflow_action FIELDS instance;

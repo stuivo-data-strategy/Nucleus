@@ -63,14 +63,15 @@ export class PeopleService {
   }
 
   async searchPeople(searchTerm: string, filters?: any) {
+    const qLower = searchTerm.toLowerCase();
     const query = `
       SELECT * FROM person
-      WHERE first_name ~ $q
-      OR last_name ~ $q
-      OR email ~ $q
-      OR job_title ~ $q;
+      WHERE string::lowercase(first_name) CONTAINS $q
+      OR string::lowercase(last_name) CONTAINS $q
+      OR string::lowercase(email) CONTAINS $q
+      OR string::lowercase(job_title) CONTAINS $q;
     `;
-    const res = await this.db.query(query, { q: searchTerm });
+    const res = await this.db.query(query, { q: qLower });
     return res[0];
   }
 

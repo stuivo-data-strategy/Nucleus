@@ -1,3 +1,2 @@
 "use strict";
-// Core Types for Nucleus PBAC Workflow Engine
 Object.defineProperty(exports, "__esModule", { value: true });

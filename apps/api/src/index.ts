@@ -1,4 +1,4 @@
-import Fastify from 'fastify';
+﻿import Fastify from 'fastify';
 import fastifyWebsocket from '@fastify/websocket';
 import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
@@ -67,3 +67,5 @@ process.on('SIGINT', async () => {
   await server.close();
   process.exit(0);
 });
+// trigger reload
+

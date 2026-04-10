@@ -14,8 +14,9 @@ function randomName() {
 
 function cleanData(obj: any) {
   const { id, ...rest } = obj;
-  // Remove null/undefined values - SurrealDB 3.0 rejects JS null for optional fields
-  return Object.fromEntries(Object.entries(rest).filter(([_, v]) => v != null));
+  // Remove null/undefined values
+  const out = Object.fromEntries(Object.entries(rest).filter(([_, v]) => v != null));
+  return out;
 }
 
 async function seed() {
@@ -34,7 +35,7 @@ async function seed() {
     { id: 'job_classification:e4', family: 'Engineering', title: 'Senior Engineer', grade: 'E4', employee_class: 'full_time', pay_range: { min: 65000, mid: 75000, max: 85000, currency: 'GBP' } },
     { id: 'job_classification:e3', family: 'Engineering', title: 'Engineer', grade: 'E3', employee_class: 'full_time', pay_range: { min: 50000, mid: 60000, max: 70000, currency: 'GBP' } }
   ];
-  for (const j of jobs) await db.query(`UPSERT ${j.id} CONTENT $data`, { data: cleanData(j) });
+  for (const j of jobs) await db.query(`UPSERT ${j.id} MERGE $data`, { data: cleanData(j) });
   console.log(`Seeded ${jobs.length} job classifications.`);
 
   console.log("Seeding org units...");
@@ -66,7 +67,7 @@ async function seed() {
     { id: 'org_unit:people_ops', type: 'department', code: 'DEP-POP', name: 'People Operations', parent: 'org_unit:hr_div', status: 'active' },
     { id: 'org_unit:talent_acq', type: 'department', code: 'DEP-TA', name: 'Talent Acquisition', parent: 'org_unit:hr_div', status: 'active' }
   ];
-  for (const o of orgs) await db.query(`UPSERT ${o.id} CONTENT $data`, { data: cleanData(o) });
+  for (const o of orgs) await db.query(`UPSERT ${o.id} MERGE $data`, { data: cleanData(o) });
   console.log(`Seeded ${orgs.length} org units.`);
 
   console.log("Seeding cost centres...");
@@ -79,15 +80,15 @@ async function seed() {
     { id: 'cost_centre:cc3000', code: 'CC-3000', name: 'Corporate Services General', owner: 'person:amara_okafor' },
     { id: 'cost_centre:cc4000', code: 'CC-4000', name: 'Commercial General' }
   ];
-  for (const c of ccs) await db.query(`UPSERT ${c.id} CONTENT $data`, { data: cleanData(c) });
+  for (const c of ccs) await db.query(`UPSERT ${c.id} MERGE $data`, { data: cleanData(c) });
   console.log(`Seeded ${ccs.length} cost centres.`);
 
   console.log("Seeding people & positions...");
   
   let empCounter = 1000;
-  const positions = [];
-  const edgeHolds = [];
-  const edgeReports = [];
+  const positions: any[] = [];
+  const edgeHolds: any[] = [];
+  const edgeReports: any[] = [];
   const edgeOwnsBudget = [];
 
   const addPerson = async (id: string, f: string, l: string, title: string, job_c: string, org_u: string, cc: string, manager: string|null) => {
@@ -124,7 +125,7 @@ async function seed() {
       employment_type: 'permanent',
       fte: 1.0
     };
-    await db.query(`UPSERT ${id} CONTENT $data`, { data: cleanData(person) });
+    await db.query(`UPSERT ${id} MERGE $data`, { data: cleanData(person) });
     
     // Edges
     if (manager) edgeReports.push({ in: id, out: manager, type: 'direct' });
@@ -181,7 +182,7 @@ async function seed() {
     }
   }
 
-  for (const p of positions) await db.query(`UPSERT ${(p as any).id} CONTENT $data`, { data: cleanData(p) });
+  for (const p of positions) await db.query(`UPSERT ${(p as any).id} MERGE $data`, { data: cleanData(p) });
 
   console.log("Seeding vacant positions...");
   const vacancies = [
@@ -189,7 +190,7 @@ async function seed() {
     { id: 'position:vac_2', position_id: 'VAC-002', title: 'Data Analyst', job_classification: 'job_classification:t3', org_unit: 'org_unit:data_analytics', cost_centre: 'cost_centre:cc1011', fte_capacity: 1.0, fte_filled: 0.0, vacancy_status: 'vacant' },
     { id: 'position:vac_3', position_id: 'VAC-003', title: 'AI Solutions Designer', job_classification: 'job_classification:e4', org_unit: 'org_unit:ai_engineering', cost_centre: 'cost_centre:cc1012', fte_capacity: 1.0, fte_filled: 0.0, vacancy_status: 'vacant' }
   ];
-  for (const v of vacancies) await db.query(`UPSERT ${v.id} CONTENT $data`, { data: cleanData(v) });
+  for (const v of vacancies) await db.query(`UPSERT ${v.id} MERGE $data`, { data: cleanData(v) });
   console.log(`Seeded ${positions.length + vacancies.length} positions.`);
 
   console.log("Seeding Graph edges...");
@@ -208,22 +209,31 @@ async function seed() {
   console.log("Seeding Workflow Templates...");
   const wfs = [
     { id: 'workflow_template:expense_approval', name: 'expense_approval', module: 'expenses', status: 'active', steps: [
-      { order: 1, resolver: 'direct_manager', action: 'approve' },
-      { order: 2, resolver: 'cost_centre_owner', action: 'approve' },
-      { order: 3, resolver: 'specific_role', resolver_config: { role: 'finance_approver' }, action: 'approve' }
+      { order: 1, label: 'Direct Manager', resolver: 'direct_manager', action: 'approve' },
+      { order: 2, label: 'Cost Centre Owner', resolver: 'cost_centre_owner', action: 'approve', condition: { min_amount: 100 } },
+      { order: 3, label: 'Finance Head', resolver: 'role_based', role: 'finance_approver', action: 'approve', condition: { min_amount: 500 } }
     ]},
     { id: 'workflow_template:absence_request', name: 'absence_request', module: 'absence', status: 'active', steps: [
       { order: 1, resolver: 'direct_manager', action: 'approve' }
     ]}
   ];
-  for (const wf of wfs) await db.query(`UPSERT ${wf.id} CONTENT $data`, { data: cleanData(wf) });
+  for (const wf of wfs) await db.query(`UPSERT ${wf.id} MERGE $data`, { data: cleanData(wf) });
 
   console.log("Seeding Business Rules...");
   const brules = [
     { id: 'business_rule:br1', name: 'expense_receipt_required', module: 'expenses', trigger_event: 'expense_submitted', priority: 100, actions: [] },
     { id: 'business_rule:br2', name: 'absence_manager_approval', module: 'absence', trigger_event: 'absence_requested', priority: 100, actions: [{type: 'route_workflow', template: 'absence_request'}] }
   ];
-  for (const br of brules) await db.query(`UPSERT ${br.id} CONTENT $data`, { data: cleanData(br) });
+  for (const br of brules) await db.query(`UPSERT ${br.id} MERGE $data`, { data: cleanData(br) });
+
+  console.log("Seeding Policy Rules...");
+  const prules = [
+    { id: 'policy_rule:meals', category: 'meals', max_amount: 75, receipt_threshold: 15, description: 'Meals limit' },
+    { id: 'policy_rule:travel', category: 'travel', max_amount: 250, receipt_threshold: 10, description: 'Travel limits including taxis and rail fares' },
+    { id: 'policy_rule:accommodation', category: 'accommodation', max_amount: 200, receipt_threshold: 0, description: 'Hotel stay limits per night' },
+    { id: 'policy_rule:supplies', category: 'supplies', max_amount: 150, receipt_threshold: 20, description: 'Office supplies' }
+  ];
+  for (const pr of prules) await db.query(`UPSERT ${pr.id} MERGE $data`, { data: cleanData(pr) });
 
   console.log("Seeding RBAC roles...");
   const roles = [
@@ -233,7 +243,7 @@ async function seed() {
     { id: 'role:finance_approver', name: 'finance_approver', permissions: ['expenses:approve:all', 'expenses:read:all'] },
     { id: 'role:system_admin', name: 'system_admin', permissions: ['*:*:*'] }
   ];
-  for (const r of roles) await db.query(`UPSERT ${r.id} CONTENT $data`, { data: cleanData(r) });
+  for (const r of roles) await db.query(`UPSERT ${r.id} MERGE $data`, { data: cleanData(r) });
 
   // Grant roles
   await db.query(`RELATE person:sarah_chen->has_role->role:employee;`);

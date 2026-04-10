@@ -53,8 +53,7 @@ export class InAppAdapter implements NotificationAdapter {
          relatedWorkflowId: payload.relatedWorkflowId,
          actions: payload.actions,
          priority: payload.priority || 'normal',
-         read: false,
-         created_at: new Date().toISOString()
+         read: false
        }
     });
     return true;

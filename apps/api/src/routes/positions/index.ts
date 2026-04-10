@@ -11,7 +11,7 @@ const positionsRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void>
 
   fastify.get('/vacancies', async (request: any, reply) => {
     const srv = new PositionService(getDb());
-    const data = await srv.getVacancies((request.query as any).orgUnitId);
+    const data = await srv.getVacancies((request.query as any).orgUnitId) as any[];
     return { data, meta: { total: data.length } };
   });
 

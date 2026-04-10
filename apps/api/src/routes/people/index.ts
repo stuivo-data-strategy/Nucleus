@@ -7,7 +7,7 @@ const peopleRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> =>
   fastify.get('/', async (request: any, reply) => {
     const srv = new PeopleService(getDb());
     if (request.query.q) {
-      const data = await srv.searchPeople(request.query.q, request.query);
+      const data = await srv.searchPeople(request.query.q, request.query) as any[];
       return { data, meta: { total: data.length } };
     }
     const result = await srv.listPeople(request.query);

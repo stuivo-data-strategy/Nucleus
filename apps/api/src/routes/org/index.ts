@@ -18,7 +18,7 @@ const orgRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
   fastify.get('/:id/people', async (request: any, reply) => {
     const srv = new OrgService(getDb());
-    const data = await srv.getPeopleInUnit(request.params.id, (request.query as any).recursive === 'true');
+    const data = await srv.getPeopleInUnit(request.params.id, (request.query as any).recursive === 'true') as any[];
     return { data, meta: { total: data.length } };
   });
 
