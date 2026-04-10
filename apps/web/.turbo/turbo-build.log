@@ -1,0 +1,23 @@
+
+> web@0.1.0 build C:\Users\s2mo\Documents\MyApps\Nucleus\apps\web
+> next build
+
+  ▲ Next.js 14.2.35
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+Failed to compile.
+
+./src/lib/auth.ts:28:6
+Type error: Cannot find namespace 'AuthContext'.
+
+[0m [90m 26 |[39m[0m
+[0m [90m 27 |[39m   [36mreturn[39m ([0m
+[0m[31m[1m>[22m[39m[90m 28 |[39m     [33m<[39m[33mAuthContext[39m[33m.[39m[33mProvider[39m value[33m=[39m{{ user[33m,[39m login[33m,[39m logout }}[33m>[39m[0m
+[0m [90m    |[39m      [31m[1m^[22m[39m[0m
+[0m [90m 29 |[39m       {children}[0m
+[0m [90m 30 |[39m     [33m<[39m[33m/[39m[33mAuthContext[39m[33m.[39m[33mProvider[39m[33m>[39m[0m
+[0m [90m 31 |[39m   )[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null
+ ELIFECYCLE  Command failed with exit code 1.

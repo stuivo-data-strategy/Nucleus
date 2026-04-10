@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222.2 47.4% 11.2%;
+
+    --navy: 221 47% 20%;      /* #1B2A4A */
+    --teal: 180 50% 36%;      /* #2E8B8B */
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+    --border: 214.3 31.8% 91.4%;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: hsl(var(--foreground));
+    background-color: hsl(var(--background));
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "nucleus",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "db:seed": "pnpm --filter api db:seed"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "devDependencies": {
+    "turbo": "latest",
+    "typescript": "^5.4.0"
+  }
+}
