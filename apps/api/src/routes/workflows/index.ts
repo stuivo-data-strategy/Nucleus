@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { WorkflowService } from '../../services/workflow.service';
 import { getDb } from '../../db/connection';
-import { DEMO_USER } from '../../db/seed';
+import { DEMO_USER } from '../../db/constants';
 
 const workflowRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.post('/resolve-preview', async (request: any, reply) => {

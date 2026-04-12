@@ -4,6 +4,7 @@ export interface ResolvedApprover {
     last_name: string;
     avatar_initials: string;
     job_title: string;
+    role_label: string;
     resolution_method: string;
     resolution_path: string;
 }
@@ -45,7 +46,9 @@ export interface WorkflowInstance {
     resolution_log: string[];
     skipped_steps: {
         step: number;
+        label: string;
         reason: string;
+        min_amount?: number;
     }[];
     created_at: string;
     updated_at: string;

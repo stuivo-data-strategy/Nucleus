@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from 'fastify';
 import { getDb } from '../../db/connection';
-import { DEMO_USER } from '../../db/seed';
+import { DEMO_USER } from '../../db/constants';
 
 const notifRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get('/', async (request: any, reply) => {

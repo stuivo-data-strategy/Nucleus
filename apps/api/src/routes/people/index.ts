@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { PeopleService } from '../../services/people.service';
 import { getDb } from '../../db/connection';
-import { DEMO_USER } from '../../db/seed';
+import { DEMO_USER } from '../../db/constants';
 
 const peopleRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get('/', async (request: any, reply) => {
@@ -49,6 +49,13 @@ const peopleRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> =>
   fastify.get('/:id/permissions', async (request: any, reply) => {
     const srv = new PeopleService(getDb());
     const data = await srv.getPermissions(request.params.id);
+    return { data };
+  });
+
+  fastify.get('/:id/context', async (request: any, reply) => {
+    const srv = new PeopleService(getDb());
+    const data = await srv.getPersonContext(request.params.id);
+    if (!data) return reply.code(404).send({ error: 'Person not found' });
     return { data };
   });
 };

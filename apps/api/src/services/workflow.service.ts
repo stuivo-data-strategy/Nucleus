@@ -33,6 +33,7 @@ export class WorkflowService {
         last_name: mgr.last_name,
         avatar_initials: this.getInitials(mgr),
         job_title: mgr.job_title || 'Manager',
+        role_label: '',
         resolution_method: 'reports_to',
         resolution_path: `${initiatorName} →[reports_to]→ ${mgrName}`
       };
@@ -86,6 +87,7 @@ export class WorkflowService {
             last_name: owner.last_name,
             avatar_initials: this.getInitials(owner),
             job_title: owner.job_title || 'Cost Centre Owner',
+            role_label: '',
             resolution_method: 'owns_budget',
             resolution_path: `${prefix}${ownerName}`
           };
@@ -128,6 +130,7 @@ export class WorkflowService {
         last_name: holder.last_name,
         avatar_initials: this.getInitials(holder),
         job_title: holder.job_title || 'Approver',
+        role_label: '',
         resolution_method: 'role_lookup',
         resolution_path: `Role lookup: ${roleBaseName} → ${holderName} (${holder.job_title || 'Role Approver'})`
       };
@@ -158,15 +161,17 @@ export class WorkflowService {
     ];
 
     const resolvedSteps: ResolvedApprover[] = [];
-    const skipped_steps: { step: number; reason: string }[] = [];
+    const skipped_steps: { step: number; reason: string; min_amount?: number }[] = [];
     const existingApproverIds: string[] = [];
 
     for (const templateStep of template.steps || []) {
       // Condition Check
       if (templateStep.condition?.min_amount && context.amount < templateStep.condition.min_amount) {
-        skipped_steps.push({ 
-          step: templateStep.order, 
-          reason: `Skipped: amount £${context.amount} below threshold £${templateStep.condition.min_amount}` 
+        skipped_steps.push({
+          step: templateStep.order,
+          label: templateStep.label,
+          reason: `Skipped: amount £${context.amount} below threshold £${templateStep.condition.min_amount}`,
+          min_amount: templateStep.condition.min_amount
         });
         resolution_log.push(`Step ${templateStep.order} (${templateStep.label}): SKIPPED — amount below £${templateStep.condition.min_amount}`);
         continue;
@@ -187,6 +192,8 @@ export class WorkflowService {
          resolution_log.push(`Step ${templateStep.order} (${templateStep.label}): FAILED — ${e.message}`);
          throw e;
       }
+
+      approver.role_label = templateStep.label;
 
       resolution_log.push(`Step ${templateStep.order} (${templateStep.label}): ${approver.first_name} ${approver.last_name}`);
       resolution_log.push(`  Resolved via: ${approver.resolution_path}`);
@@ -340,16 +347,21 @@ export class WorkflowService {
   }
 
   async getPendingApprovals(personId: string): Promise<WorkflowInstance[]> {
-    const res = await this.db.query(`
-      SELECT * FROM workflow_instance WHERE status IN ['pending', 'in_progress']
-    `);
-    const all = res[0] as WorkflowInstance[];
-    
-    return all.filter(instance => {
-      if (instance.current_step < 1) return false;
-      const currentStep = instance.steps[instance.current_step - 1];
-      return currentStep && currentStep.approver_id === personId && currentStep.status === 'pending';
-    });
+    try {
+      const res = await this.db.query(`
+        SELECT * FROM workflow_instance WHERE status IN ['pending', 'in_progress']
+      `);
+      const all = res[0] as WorkflowInstance[];
+      if (!all || all.length === 0) return [];
+      return all.filter(instance => {
+        if (instance.current_step < 1) return false;
+        const currentStep = instance.steps[instance.current_step - 1];
+        return currentStep && currentStep.approver_id === personId && currentStep.status === 'pending';
+      });
+    } catch (err: any) {
+      if (err.message?.includes('does not exist')) return [];
+      throw err;
+    }
   }
 
   async getForInitiator(personId: string): Promise<WorkflowInstance[]> {

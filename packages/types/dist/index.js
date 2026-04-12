@@ -19,3 +19,4 @@ __exportStar(require("./people"), exports);
 __exportStar(require("./workflow"), exports);
 __exportStar(require("./auth"), exports);
 __exportStar(require("./policy"), exports);
+__exportStar(require("./expense"), exports);

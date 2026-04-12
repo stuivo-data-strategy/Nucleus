@@ -171,7 +171,8 @@ export class PolicyService {
 
   async getAllPolicyRules(): Promise<PolicyRule[]> {
     const res = await this.db.query(`SELECT * FROM policy_rule ORDER BY category`);
-    return res[0] as PolicyRule[];
+    const rules = res[0] as any[];
+    return rules.map(r => ({ ...r, id: r.id?.toString?.() ?? r.id }));
   }
 
   async updatePolicyRule(
@@ -179,14 +180,38 @@ export class PolicyService {
     updates: Partial<Pick<PolicyRule, 'max_amount' | 'receipt_threshold' | 'per_diem_rate'>>,
     updatedBy: string
   ): Promise<PolicyRule> {
-    const curRes = await this.db.query(`SELECT * FROM policy_rule WHERE id = $id`, { id: new StringRecordId(ruleId) });
+    const curRes = await this.db.query(`SELECT * FROM ${ruleId}`);
     const curArr = curRes[0] as any[];
     if (!curArr || curArr.length === 0) throw new Error("Rule not found");
-    const oldRule = curArr[0];
+    const oldRule = { ...curArr[0], id: curArr[0].id?.toString?.() ?? curArr[0].id };
 
     const upRes = await this.db.query(`UPDATE ${ruleId} MERGE $data`, { data: updates });
     const upArr = upRes[0] as any[];
-    const newRule = upArr[0];
+    const newRule = { ...upArr[0], id: upArr[0].id?.toString?.() ?? upArr[0].id };
+
+    await this.logPolicyAudit('POLICY_CHANGE', 'admin_change', { previous: oldRule, updated: newRule, changes: updates }, updatedBy);
+
+    return newRule;
+  }
+
+  async updatePolicyRuleByCategory(
+    category: string,
+    updates: Partial<Pick<PolicyRule, 'max_amount' | 'receipt_threshold' | 'per_diem_rate'>>,
+    updatedBy: string
+  ): Promise<PolicyRule> {
+    const curRes = await this.db.query(`SELECT * FROM policy_rule WHERE category = $cat LIMIT 1`, { cat: category });
+    const curArr = curRes[0] as any[];
+    if (!curArr || curArr.length === 0) throw new Error(`Policy rule not found for category: ${category}`);
+    const oldId: string = curArr[0].id?.toString?.() ?? String(curArr[0].id);
+    const oldRule = { ...curArr[0], id: oldId };
+
+    // Use the stringified record ID directly — e.g. "UPDATE policy_rule:meals MERGE $data"
+    await this.db.query(`UPDATE ${oldId} MERGE $data`, { data: updates });
+
+    const upRes = await this.db.query(`SELECT * FROM policy_rule WHERE category = $cat LIMIT 1`, { cat: category });
+    const upArr = upRes[0] as any[];
+    const newId: string = upArr[0].id?.toString?.() ?? String(upArr[0].id);
+    const newRule = { ...upArr[0], id: newId };
 
     await this.logPolicyAudit('POLICY_CHANGE', 'admin_change', { previous: oldRule, updated: newRule, changes: updates }, updatedBy);
 

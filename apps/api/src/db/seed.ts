@@ -49,7 +49,7 @@ async function seed() {
     { id: 'org_unit:commercial', type: 'business_unit', code: 'BU-CM', name: 'Commercial', parent: 'org_unit:meridian', status: 'active' },
     
     // Divisions
-    { id: 'org_unit:ai_data', type: 'division', code: 'DIV-AID', name: 'AI & Data', parent: 'org_unit:tech_data', status: 'active', head: 'person:peter_blackwell' },
+    { id: 'org_unit:ai_data', type: 'division', code: 'DIV-AID', name: 'Digital Delivery', parent: 'org_unit:tech_data', status: 'active', head: 'person:peter_blackwell' },
     { id: 'org_unit:it_ops', type: 'division', code: 'DIV-ITO', name: 'IT Operations', parent: 'org_unit:tech_data', status: 'active' },
     { id: 'org_unit:sw_dev', type: 'division', code: 'DIV-SWD', name: 'Software Development', parent: 'org_unit:tech_data', status: 'active' },
     { id: 'org_unit:project_del', type: 'division', code: 'DIV-PRD', name: 'Project Delivery', parent: 'org_unit:ops', status: 'active' },
@@ -59,7 +59,7 @@ async function seed() {
     { id: 'org_unit:bus_dev', type: 'division', code: 'DIV-BD', name: 'Business Development', parent: 'org_unit:commercial', status: 'active' },
     
     // Departments
-    { id: 'org_unit:data_analytics', type: 'department', code: 'DEP-DA', name: 'Data & Analytics', parent: 'org_unit:ai_data', status: 'active', head: 'person:james_morton' },
+    { id: 'org_unit:data_analytics', type: 'department', code: 'DEP-DA', name: 'Digital Delivery', parent: 'org_unit:ai_data', status: 'active', head: 'person:james_morton' },
     { id: 'org_unit:ai_engineering', type: 'department', code: 'DEP-AIE', name: 'AI Engineering', parent: 'org_unit:ai_data', status: 'active' },
     { id: 'org_unit:data_engineering', type: 'department', code: 'DEP-DE', name: 'Data Engineering', parent: 'org_unit:ai_data', status: 'active' },
     { id: 'org_unit:civil_eng', type: 'department', code: 'DEP-CIV', name: 'Civil Engineering', parent: 'org_unit:project_del', status: 'active' },
@@ -73,8 +73,8 @@ async function seed() {
   console.log("Seeding cost centres...");
   const ccs = [
     { id: 'cost_centre:cc1000', code: 'CC-1000', name: 'Technology & Data General', owner: 'person:richard_keane' },
-    { id: 'cost_centre:cc1010', code: 'CC-1010', name: 'AI & Data Division', parent: 'cost_centre:cc1000', owner: 'person:peter_blackwell' },
-    { id: 'cost_centre:cc1011', code: 'CC-1011', name: 'Data & Analytics', parent: 'cost_centre:cc1010', owner: 'person:james_morton' },
+    { id: 'cost_centre:cc1010', code: 'CC-1010', name: 'Digital Delivery Division', parent: 'cost_centre:cc1000', owner: 'person:peter_blackwell' },
+    { id: 'cost_centre:cc1011', code: 'CC-1011', name: 'Digital Delivery', parent: 'cost_centre:cc1010', owner: 'person:james_morton' },
     { id: 'cost_centre:cc1012', code: 'CC-1012', name: 'AI Engineering', parent: 'cost_centre:cc1010' },
     { id: 'cost_centre:cc2000', code: 'CC-2000', name: 'Operations General', owner: 'person:david_hargreaves' },
     { id: 'cost_centre:cc3000', code: 'CC-3000', name: 'Corporate Services General', owner: 'person:amara_okafor' },
@@ -83,13 +83,15 @@ async function seed() {
   for (const c of ccs) await db.query(`UPSERT ${c.id} MERGE $data`, { data: cleanData(c) });
   console.log(`Seeded ${ccs.length} cost centres.`);
 
+  console.log("Clearing existing people & positions...");
+  await db.query(`DELETE reports_to; DELETE holds_position; DELETE owns_budget; DELETE has_role; DELETE person; DELETE position;`);
+
   console.log("Seeding people & positions...");
   
   let empCounter = 1000;
   const positions: any[] = [];
   const edgeHolds: any[] = [];
   const edgeReports: any[] = [];
-  const edgeOwnsBudget = [];
 
   const addPerson = async (id: string, f: string, l: string, title: string, job_c: string, org_u: string, cc: string, manager: string|null) => {
     empCounter++;
@@ -140,11 +142,12 @@ async function seed() {
   await addPerson('person:richard_keane', 'Richard', 'Keane', 'CTO', 'job_classification:x3', 'org_unit:tech_data', 'cost_centre:cc1000', 'person:margaret_thornton');
 
   // Tech & Data Leadership
-  await addPerson('person:peter_blackwell', 'Peter', 'Blackwell', 'Head of AI & Data', 'job_classification:m4', 'org_unit:ai_data', 'cost_centre:cc1010', 'person:richard_keane');
-  await addPerson('person:james_morton', 'James', 'Morton', 'Head of Data & Analytics', 'job_classification:m3', 'org_unit:data_analytics', 'cost_centre:cc1011', 'person:peter_blackwell');
-  
+  await addPerson('person:peter_diciacca', 'Peter', 'DiCiacca', 'Global IT Director', 'job_classification:x3', 'org_unit:tech_data', 'cost_centre:cc1000', 'person:margaret_thornton');
+  await addPerson('person:peter_blackwell', 'Peter', 'Passaro', 'Global Director of AI and Data', 'job_classification:m4', 'org_unit:ai_data', 'cost_centre:cc1010', 'person:peter_diciacca');
+  await addPerson('person:james_morton', 'Stu', 'Morris', 'Head of Digital Delivery', 'job_classification:m3', 'org_unit:data_analytics', 'cost_centre:cc1011', 'person:peter_blackwell');
+
   // Specific required person
-  await addPerson(DEMO_USER, 'Sarah', 'Chen', 'Senior Analyst', 'job_classification:t4', 'org_unit:data_analytics', 'cost_centre:cc1011', 'person:james_morton');
+  await addPerson(DEMO_USER, 'Sarah', 'Chen', 'Senior Developer', 'job_classification:e4', 'org_unit:data_analytics', 'cost_centre:cc1011', 'person:james_morton');
 
   // Data & Analytics members
   for(let i=0; i<4; i++) {
@@ -200,7 +203,7 @@ async function seed() {
   for (const h of edgeHolds) {
     await db.query(`RELATE ${h.in}->holds_position->${h.out} SET fte_allocation = ${h.fte};`);
   }
-  
+
   // Cost centre ownership edges
   await db.query(`RELATE person:richard_keane->owns_budget->cost_centre:cc1000 SET authority_level = 'full';`);
   await db.query(`RELATE person:peter_blackwell->owns_budget->cost_centre:cc1010 SET authority_level = 'full';`);
@@ -255,4 +258,9 @@ async function seed() {
   await dbConnection.close();
 }
 
-seed().catch(console.error);
+// Only run when executed directly: pnpm db:seed
+const isMain = process.argv[1]?.replace(/\\/g, '/').endsWith('db/seed.ts') ||
+               process.argv[1]?.replace(/\\/g, '/').endsWith('db/seed.js');
+if (isMain) {
+  seed().catch(console.error);
+}

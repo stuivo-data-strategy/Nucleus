@@ -20,11 +20,11 @@ const policyRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> =>
     return { status: 'success', data: rules };
   });
 
-  fastify.patch('/rules/:id', async (request, reply) => {
+  fastify.patch('/rules/category/:category', async (request, reply) => {
     const params = request.params as any;
     const updates = request.body as any;
-    const updatedBy = (request.user as any)?.id || 'system';
-    const rule = await policyService.updatePolicyRule(params.id, updates, updatedBy);
+    const updatedBy = (request.headers as any)['x-user-id'] || (request.user as any)?.id || 'system';
+    const rule = await policyService.updatePolicyRuleByCategory(params.category, updates, updatedBy);
     return { status: 'success', data: rule };
   });
 

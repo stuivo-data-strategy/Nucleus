@@ -4,8 +4,8 @@ import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
 
 export const metadata = {
-  title: 'Nucleus | Meridian Engineering',
-  description: 'Premium Work Platform',
+  title: 'Nucleus — Expenses',
+  description: 'Policy-driven expense management with graph-based approvals',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

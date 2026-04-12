@@ -6,6 +6,7 @@ export interface ResolvedApprover {
   last_name: string;
   avatar_initials: string;
   job_title: string;
+  role_label: string;         // Approval chain role: 'Line Manager', 'Cost Centre Owner', etc.
   resolution_method: string;  // How they were found: 'reports_to', 'owns_budget', 'role lookup'
   resolution_path: string;    // Human-readable: "Sarah Chen →[reports_to]→ Alex Drummond"
 }
@@ -49,7 +50,7 @@ export interface WorkflowInstance {
   status: 'pending' | 'in_progress' | 'approved' | 'rejected' | 'queried';
   steps: WorkflowInstanceStep[];
   resolution_log: string[];
-  skipped_steps: { step: number; reason: string }[];
+  skipped_steps: { step: number; label: string; reason: string; min_amount?: number }[];
   created_at: string;
   updated_at: string;
 }
