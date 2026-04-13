@@ -148,68 +148,110 @@ export class ExpenseService {
       description: string;
       currency?: string;
       receipt_url?: string;
+      // Partial claim fields
+      receipt_amount?: number;
+      claim_amount?: number;
+      partial_claim?: boolean;
+      partial_reason?: string;
+      // Exception fields
+      exception_requested?: boolean;
+      exception_justification?: string;
     }
   ): Promise<{ claim: ExpenseClaimEnriched; workflow: any; policy_result: any }> {
-    const { category, amount, date, has_receipt, description, currency = 'GBP', receipt_url } = body;
+    const {
+      category, date, has_receipt, description, currency = 'GBP', receipt_url,
+      receipt_amount, claim_amount, partial_claim, partial_reason,
+      exception_requested, exception_justification,
+    } = body;
+
+    // Resolve the actual claim amount (partial claims use claim_amount, otherwise use amount)
+    const claimAmount = claim_amount ?? body.amount;
+    const receiptAmount = receipt_amount ?? claimAmount;
 
     // 1. Input validation
-    if (!category || amount == null || !date || has_receipt == null) {
+    if (!category || claimAmount == null || !date || has_receipt == null) {
       throw Object.assign(new Error('category, amount, date and has_receipt are required'), { statusCode: 400 });
     }
 
-    // 2. Policy validation (server-side — defence in depth)
+    if (partial_claim && (!partial_reason || partial_reason.trim() === '')) {
+      throw Object.assign(new Error('A reason is required for partial claims'), { statusCode: 400 });
+    }
+
+    if (exception_requested && (!exception_justification || exception_justification.trim() === '')) {
+      throw Object.assign(new Error('A justification is required for policy exception requests'), { statusCode: 400 });
+    }
+
+    // 2. Policy validation — validates against claim_amount
     const policy_result = await this.policySvc.validateClaim({
-      category, amount, has_receipt, date, claimant_id: claimantId,
+      category, amount: claimAmount, has_receipt, date, claimant_id: claimantId,
     });
 
-    if (!policy_result.passed) {
+    // Block on policy failure unless the claimant has explicitly requested an exception
+    if (!policy_result.passed && !exception_requested) {
       throw Object.assign(new Error('Policy validation failed'), { statusCode: 400, policy_result });
     }
 
     // 3. Generate reference
     const reference = await this.nextReference();
 
-    // 4. Create the expense_claim record
-    const claimData = {
+    // 4. Determine status and workflow template
+    const initialStatus = exception_requested ? 'exception_requested' : 'submitted';
+    const workflowTemplate = exception_requested ? 'expense_approval_exception' : 'expense_approval';
+
+    // 5. Create the expense_claim record
+    const claimData: Record<string, any> = {
       reference,
       claimant: new StringRecordId(claimantId),
       category,
-      amount,
+      amount: claimAmount,
       currency,
       description,
       date,
       has_receipt,
       receipt_url: receipt_url || null,
-      status: 'submitted',
+      status: initialStatus,
       policy_result,
     };
+
+    if (partial_claim) {
+      claimData.receipt_amount = receiptAmount;
+      claimData.claim_amount = claimAmount;
+      claimData.partial_claim = true;
+      claimData.partial_reason = partial_reason;
+    }
+
+    if (exception_requested) {
+      claimData.exception_requested = true;
+      claimData.exception_justification = exception_justification;
+    }
 
     const cRes = await this.db.query(`CREATE expense_claim CONTENT $data`, { data: claimData });
     const cArr = cRes[0] as any[];
     const newClaim = cArr[0];
     const claimId = newClaim.id?.toString ? newClaim.id.toString() : newClaim.id;
 
-    // 5. Log policy audit
+    // 6. Log policy audit
     await this.policySvc.logPolicyAudit(claimId, 'submission', policy_result, claimantId);
 
-    // 6. Create workflow instance (graph traversal happens here)
+    // 7. Create workflow instance (graph traversal happens here)
     const workflow = await this.workflowSvc.createInstance(
-      'expense_approval',
+      workflowTemplate,
       claimantId,
       'expense_claim',
       claimId,
-      { amount, category }
+      { amount: claimAmount, category }
     );
 
     const workflowId = workflow.id?.toString ? workflow.id.toString() : workflow.id;
 
-    // 7. Link workflow to claim and advance status to pending
+    // 8. Link workflow to claim and advance status to pending
+    const pendingStatus = exception_requested ? 'exception_requested' : 'pending';
     await this.db.query(
-      `UPDATE type::record($id) MERGE { workflow_instance: type::record($wi), status: 'pending' }`,
-      { id: claimId, wi: workflowId }
+      `UPDATE type::record($id) MERGE { workflow_instance: type::record($wi), status: $status }`,
+      { id: claimId, wi: workflowId, status: pendingStatus }
     );
 
-    const enriched = await this.enrichClaim({ ...newClaim, status: 'pending', workflow_instance: workflowId });
+    const enriched = await this.enrichClaim({ ...newClaim, status: pendingStatus, workflow_instance: workflowId });
     enriched.workflow = workflow as any;
 
     return { claim: enriched, workflow, policy_result };

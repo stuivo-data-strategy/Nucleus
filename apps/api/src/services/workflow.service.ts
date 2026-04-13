@@ -109,6 +109,29 @@ export class WorkflowService {
     throw new Error('Failed to resolve cost centre owner Hierarchy');
   }
 
+  async resolveSkipLevelManager(personId: string, initiatorName: string): Promise<ResolvedApprover> {
+    const res = await this.db.query(`
+      SELECT ->reports_to->person->reports_to->person.* AS skip_managers FROM type::record($id)
+    `, { id: personId });
+    const arr = res[0] as any[];
+
+    if (arr && arr[0] && arr[0].skip_managers && arr[0].skip_managers.length > 0) {
+      const mgr = arr[0].skip_managers[0];
+      const mgrName = this.getPersonName(mgr);
+      return {
+        person_id: mgr.id.toString(),
+        first_name: mgr.first_name,
+        last_name: mgr.last_name,
+        avatar_initials: this.getInitials(mgr),
+        job_title: mgr.job_title || 'Senior Manager',
+        role_label: '',
+        resolution_method: 'skip_level',
+        resolution_path: `${initiatorName} →[reports_to]→ Manager →[reports_to]→ ${mgrName}`
+      };
+    }
+    throw new Error(`Skip-level manager not found for ${personId}`);
+  }
+
   async resolveRoleBased(roleId: string): Promise<ResolvedApprover> {
     // roleId is like 'finance_approver' or 'role:finance_approver'
     const roleBaseName = roleId.replace('role:', '');
@@ -161,7 +184,7 @@ export class WorkflowService {
     ];
 
     const resolvedSteps: ResolvedApprover[] = [];
-    const skipped_steps: { step: number; reason: string; min_amount?: number }[] = [];
+    const skipped_steps: { step: number; label: string; reason: string; min_amount?: number }[] = [];
     const existingApproverIds: string[] = [];
 
     for (const templateStep of template.steps || []) {
@@ -179,7 +202,9 @@ export class WorkflowService {
 
       let approver: ResolvedApprover;
       try {
-        if (templateStep.resolver === 'direct_manager') {
+        if (templateStep.resolver === 'skip_level_manager') {
+          approver = await this.resolveSkipLevelManager(initiatorId, initiatorName);
+        } else if (templateStep.resolver === 'direct_manager') {
           approver = await this.resolveDirectManager(initiatorId, initiatorName);
         } else if (templateStep.resolver === 'cost_centre_owner') {
           approver = await this.resolveCostCentreOwner(initiatorId, existingApproverIds, initiatorName);

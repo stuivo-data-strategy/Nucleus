@@ -139,10 +139,20 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
 
   // Stage 2 form state
   const [category, setCategory] = useState('meals');
-  const [amount, setAmount] = useState('');
+  const [receiptAmount, setReceiptAmount] = useState('');
+  const [claimAmount, setClaimAmount] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [hasReceipt, setHasReceipt] = useState(false);
+
+  // Partial claim state
+  const [partialReason, setPartialReason] = useState('');
+  const [partialReasonOther, setPartialReasonOther] = useState('');
+
+  // Exception state
+  const [exceptionRequested, setExceptionRequested] = useState(false);
+  const [exceptionJustification, setExceptionJustification] = useState('');
+  const [exceptionConfirmed, setExceptionConfirmed] = useState(false);
 
   // Policy state
   const [policyResult, setPolicyResult] = useState<PolicyResult | null>(null);
@@ -176,7 +186,8 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
       const data = await apiFetch('/expenses/ocr-scan', { method: 'POST' }, userId);
       const result: OcrResult = data.data;
       setOcr(result);
-      setAmount(result.amount.toFixed(2));
+      setReceiptAmount(result.amount.toFixed(2));
+      setClaimAmount(result.amount.toFixed(2));
       setCategory(result.category_suggestion || 'other');
       setDate(result.date);
       setDescription(`Expense at ${result.vendor}`);
@@ -189,14 +200,15 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
     }
   };
 
-  // ── Live policy validation (debounced 300 ms) ────────────────────────────
+  // ── Live policy validation — validates against claim amount (debounced 300 ms) ──
 
   useEffect(() => {
     if (stage !== 2) return;
     if (policyTimerRef.current) clearTimeout(policyTimerRef.current);
-    const num = parseFloat(amount);
-    if (!amount || isNaN(num) || num <= 0) {
+    const num = parseFloat(claimAmount);
+    if (!claimAmount || isNaN(num) || num <= 0) {
       setPolicyResult(null);
+      setExceptionRequested(false);
       return;
     }
     setPolicyLoading(true);
@@ -210,7 +222,10 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
           },
           userId
         );
-        setPolicyResult(data.data as PolicyResult);
+        const result = data.data as PolicyResult;
+        setPolicyResult(result);
+        // Reset exception state when policy now passes
+        if (result.passed) setExceptionRequested(false);
       } catch {
         setPolicyResult(null);
       } finally {
@@ -218,15 +233,15 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
       }
     }, 300);
     return () => { if (policyTimerRef.current) clearTimeout(policyTimerRef.current); };
-  }, [amount, category, hasReceipt, date, stage, userId]);
+  }, [claimAmount, category, hasReceipt, date, stage, userId]);
 
   // ── Live route preview (debounced 400 ms) ────────────────────────────────
 
   useEffect(() => {
     if (stage !== 2) return;
     if (routeTimerRef.current) clearTimeout(routeTimerRef.current);
-    const num = parseFloat(amount);
-    if (!amount || isNaN(num) || num <= 0) {
+    const num = parseFloat(claimAmount);
+    if (!claimAmount || isNaN(num) || num <= 0) {
       setRoutePreview(null);
       return;
     }
@@ -249,29 +264,36 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
       }
     }, 400);
     return () => { if (routeTimerRef.current) clearTimeout(routeTimerRef.current); };
-  }, [amount, category, stage, userId]);
+  }, [claimAmount, category, stage, userId]);
 
   // ── Submit ───────────────────────────────────────────────────────────────
 
   const handleSubmit = async () => {
     setSubmitting(true);
     setSubmitError(null);
+    const claimNum  = parseFloat(claimAmount);
+    const receiptNum = parseFloat(receiptAmount) || claimNum;
+    const isPartial = receiptNum > 0 && claimNum > 0 && claimNum < receiptNum;
     try {
-      const data = await apiFetch(
-        '/expenses',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            category,
-            amount: parseFloat(amount),
-            date,
-            has_receipt: hasReceipt,
-            description,
-            currency: 'GBP',
-          }),
-        },
-        userId
-      );
+      const payload: Record<string, any> = {
+        category,
+        amount: claimNum,
+        date,
+        has_receipt: hasReceipt,
+        description,
+        currency: 'GBP',
+        receipt_amount: receiptNum,
+        claim_amount: claimNum,
+      };
+      if (isPartial) {
+        payload.partial_claim = true;
+        payload.partial_reason = partialReason === 'other' ? partialReasonOther.trim() : partialReason;
+      }
+      if (exceptionRequested) {
+        payload.exception_requested = true;
+        payload.exception_justification = exceptionJustification.trim();
+      }
+      const data = await apiFetch('/expenses', { method: 'POST', body: JSON.stringify(payload) }, userId);
       setConfirmedClaim(data.data);
       goTo(3);
       onSuccess?.(data.data);
@@ -284,9 +306,20 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
 
   // ── Derived ──────────────────────────────────────────────────────────────
 
-  const hasFail = policyResult?.checks.some(c => c.severity === 'fail') ?? false;
-  const amountNum = parseFloat(amount) || 0;
-  const canSubmit = amount && amountNum > 0 && !hasFail && !submitting;
+  const claimNum   = parseFloat(claimAmount) || 0;
+  const receiptNum = parseFloat(receiptAmount) || 0;
+  const isPartialClaim = ocr !== null && receiptNum > 0 && claimNum > 0 && claimNum < receiptNum;
+  const hasFail    = policyResult?.checks.some(c => c.severity === 'fail') ?? false;
+
+  const partialReasonValid = !isPartialClaim
+    || (partialReason !== '' && (partialReason !== 'other' || partialReasonOther.trim() !== ''));
+  const exceptionValid = !exceptionRequested
+    || (exceptionJustification.trim() !== '' && exceptionConfirmed);
+
+  const canSubmit = claimNum > 0
+    && partialReasonValid
+    && (!hasFail || exceptionValid)
+    && !submitting;
 
   // ── Animation variants ───────────────────────────────────────────────────
 
@@ -544,27 +577,102 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                     </div>
                   </div>
 
-                  {/* Amount */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Amount</label>
-                    <div className={`flex items-center border-2 rounded-xl overflow-hidden transition-colors ${
-                      hasFail && amount ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-white focus-within:border-[#2E8B8B]'
-                    }`}>
-                      <span className="pl-4 text-2xl font-bold text-gray-400 font-mono select-none">£</span>
-                      <input
-                        type="number"
-                        step="1"
-                        min="0"
-                        value={amount}
-                        onChange={e => setAmount(e.target.value)}
-                        placeholder="0.00"
-                        className="flex-1 px-2 py-4 text-2xl font-bold font-mono text-[#1B2A4A] bg-transparent outline-none placeholder:text-gray-300"
-                      />
-                      {policyLoading && (
-                        <span className="pr-4 animate-spin border-2 border-[#2E8B8B] border-t-transparent rounded-full w-4 h-4 shrink-0" />
-                      )}
+                  {/* Amount — two fields when OCR detected, single field otherwise */}
+                  {ocr ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Receipt Amount</label>
+                        <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden bg-gray-50">
+                          <span className="pl-4 text-xl font-bold text-gray-300 font-mono select-none">£</span>
+                          <input
+                            type="number" step="0.01" min="0"
+                            value={receiptAmount}
+                            onChange={e => setReceiptAmount(e.target.value)}
+                            placeholder="0.00"
+                            className="flex-1 px-2 py-3 text-xl font-bold font-mono text-gray-400 bg-transparent outline-none placeholder:text-gray-300"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Claim Amount</label>
+                        <div className={`flex items-center border-2 rounded-xl overflow-hidden transition-colors ${
+                          hasFail && !exceptionRequested && claimAmount ? 'border-red-400 bg-red-50' : isPartialClaim ? 'border-amber-300 bg-amber-50 focus-within:border-amber-400' : 'border-gray-200 bg-white focus-within:border-[#2E8B8B]'
+                        }`}>
+                          <span className="pl-3 text-xl font-bold text-gray-400 font-mono select-none">£</span>
+                          <input
+                            type="number" step="0.01" min="0"
+                            value={claimAmount}
+                            onChange={e => setClaimAmount(e.target.value)}
+                            placeholder="0.00"
+                            className="flex-1 px-2 py-3 text-xl font-bold font-mono text-[#1B2A4A] bg-transparent outline-none placeholder:text-gray-300"
+                          />
+                          {policyLoading && (
+                            <span className="pr-3 animate-spin border-2 border-[#2E8B8B] border-t-transparent rounded-full w-4 h-4 shrink-0" />
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Amount</label>
+                      <div className={`flex items-center border-2 rounded-xl overflow-hidden transition-colors ${
+                        hasFail && !exceptionRequested && claimAmount ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-white focus-within:border-[#2E8B8B]'
+                      }`}>
+                        <span className="pl-4 text-2xl font-bold text-gray-400 font-mono select-none">£</span>
+                        <input
+                          type="number" step="0.01" min="0"
+                          value={claimAmount}
+                          onChange={e => { setClaimAmount(e.target.value); setReceiptAmount(e.target.value); }}
+                          placeholder="0.00"
+                          className="flex-1 px-2 py-4 text-2xl font-bold font-mono text-[#1B2A4A] bg-transparent outline-none placeholder:text-gray-300"
+                        />
+                        {policyLoading && (
+                          <span className="pr-4 animate-spin border-2 border-[#2E8B8B] border-t-transparent rounded-full w-4 h-4 shrink-0" />
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Partial claim info panel */}
+                  <AnimatePresence>
+                    {isPartialClaim && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-3">
+                          <p className="text-sm font-semibold text-amber-800">
+                            ℹ️ You are claiming <span className="font-bold">£{claimNum.toFixed(2)}</span> of a <span className="font-bold">£{receiptNum.toFixed(2)}</span> receipt
+                          </p>
+                          <div>
+                            <label className="block text-xs font-bold text-amber-700 uppercase tracking-wider mb-1.5">Reason for partial claim <span className="text-red-500">*</span></label>
+                            <select
+                              value={partialReason}
+                              onChange={e => setPartialReason(e.target.value)}
+                              className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm text-[#1B2A4A] bg-white focus:outline-none focus:border-amber-500"
+                            >
+                              <option value="">Select a reason…</option>
+                              <option value="personal_guest">Personal guest included</option>
+                              <option value="shared_bill">Shared bill — claiming my portion</option>
+                              <option value="partial_business">Partial business use</option>
+                              <option value="other">Other</option>
+                            </select>
+                          </div>
+                          {partialReason === 'other' && (
+                            <input
+                              type="text"
+                              value={partialReasonOther}
+                              onChange={e => setPartialReasonOther(e.target.value)}
+                              placeholder="Please describe the reason…"
+                              className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm text-[#1B2A4A] bg-white focus:outline-none focus:border-amber-500 placeholder:text-amber-400"
+                            />
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Live policy checks */}
                   <AnimatePresence mode="wait">
@@ -595,14 +703,71 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                             <span className="leading-snug">{check.message}</span>
                           </motion.div>
                         ))}
+
+                        {/* Exception request option when policy fails */}
                         {hasFail && (
-                          <motion.p
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="text-xs text-red-500 font-semibold text-center pt-1"
-                          >
-                            Fix policy issues above to submit
-                          </motion.p>
+                          <AnimatePresence>
+                            {!exceptionRequested ? (
+                              <motion.div
+                                key="exception-offer"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="pt-1 space-y-2"
+                              >
+                                <p className="text-xs text-red-500 font-semibold text-center">
+                                  This claim exceeds policy limits
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={() => setExceptionRequested(true)}
+                                  className="w-full py-2.5 rounded-xl text-sm font-bold border-2 border-amber-400 text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors"
+                                >
+                                  Request policy exception instead →
+                                </button>
+                              </motion.div>
+                            ) : (
+                              <motion.div
+                                key="exception-form"
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-4 space-y-3">
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-sm font-bold text-amber-800">⚠️ Policy Exception Request</p>
+                                    <button
+                                      type="button"
+                                      onClick={() => { setExceptionRequested(false); setExceptionConfirmed(false); setExceptionJustification(''); }}
+                                      className="text-xs text-amber-600 hover:text-amber-800 underline"
+                                    >
+                                      Cancel
+                                    </button>
+                                  </div>
+                                  <p className="text-xs text-amber-700">Your claim will be routed to a senior manager for exception approval. Provide a clear business justification.</p>
+                                  <textarea
+                                    value={exceptionJustification}
+                                    onChange={e => setExceptionJustification(e.target.value)}
+                                    placeholder="Business justification — e.g. client lunch ran over budget due to extended meeting…"
+                                    rows={3}
+                                    className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm text-[#1B2A4A] bg-white focus:outline-none focus:border-amber-500 resize-none placeholder:text-amber-400"
+                                  />
+                                  <label className="flex items-start gap-2.5 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={exceptionConfirmed}
+                                      onChange={e => setExceptionConfirmed(e.target.checked)}
+                                      className="mt-0.5 w-4 h-4 accent-amber-500 shrink-0"
+                                    />
+                                    <span className="text-xs text-amber-800 font-medium leading-snug">
+                                      I confirm this is a legitimate business expense and understand it requires senior manager approval
+                                    </span>
+                                  </label>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         )}
                       </motion.div>
                     )}
@@ -852,7 +1017,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500 font-medium">Amount</span>
                         <span className="font-bold text-[#1B2A4A]">
-                          £{parseFloat(amount).toFixed(2)}
+                          £{claimNum.toFixed(2)}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
@@ -890,7 +1055,9 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                 disabled={!canSubmit}
                 className={`w-full h-12 rounded-xl text-base font-bold flex items-center justify-center gap-2 transition-all ${
                   canSubmit
-                    ? 'bg-[#2E8B8B] text-white hover:bg-[#257373] shadow-md shadow-[#2E8B8B]/20'
+                    ? exceptionRequested
+                      ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-md shadow-amber-500/20'
+                      : 'bg-[#2E8B8B] text-white hover:bg-[#257373] shadow-md shadow-[#2E8B8B]/20'
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
               >
@@ -899,10 +1066,15 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                     <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-5 h-5" />
                     Submitting…
                   </>
+                ) : exceptionRequested ? (
+                  <>
+                    ⚠️ Submit with Exception Request
+                    {claimNum > 0 && <span className="opacity-80">· £{claimNum.toFixed(2)}</span>}
+                  </>
                 ) : (
                   <>
                     Submit Claim
-                    {amountNum > 0 && <span className="opacity-80">· £{amountNum.toFixed(2)}</span>}
+                    {claimNum > 0 && <span className="opacity-80">· £{claimNum.toFixed(2)}</span>}
                   </>
                 )}
               </motion.button>

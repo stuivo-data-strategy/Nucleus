@@ -218,6 +218,12 @@ async function seed() {
     ]},
     { id: 'workflow_template:absence_request', name: 'absence_request', module: 'absence', status: 'active', steps: [
       { order: 1, resolver: 'direct_manager', action: 'approve' }
+    ]},
+    { id: 'workflow_template:expense_approval_exception', name: 'expense_approval_exception', module: 'expenses', status: 'active', steps: [
+      { order: 1, label: 'Senior Manager (Exception)', resolver: 'skip_level_manager', action: 'approve' },
+      { order: 2, label: 'Line Manager', resolver: 'direct_manager', action: 'approve' },
+      { order: 3, label: 'Cost Centre Owner', resolver: 'cost_centre_owner', action: 'approve', condition: { min_amount: 100 } },
+      { order: 4, label: 'Finance', resolver: 'role_based', role: 'finance_approver', action: 'approve', condition: { min_amount: 500 } }
     ]}
   ];
   for (const wf of wfs) await db.query(`UPSERT ${wf.id} MERGE $data`, { data: cleanData(wf) });

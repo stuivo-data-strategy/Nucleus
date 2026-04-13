@@ -468,7 +468,37 @@ function ApprovalCard({ claim, userId, onDismiss, onRequestReject }: ApprovalCar
                     ⚠ No receipt
                   </span>
                 )}
+                {claim.exception_requested && (
+                  <span className="text-xs font-bold text-amber-700 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full">
+                    ⚠️ Exception Request
+                  </span>
+                )}
+                {claim.partial_claim && (
+                  <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                    Partial claim
+                  </span>
+                )}
               </div>
+
+              {/* Exception justification banner */}
+              {claim.exception_requested && claim.exception_justification && (
+                <div className="mx-5 mb-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                  <p className="text-[11px] font-bold text-amber-600 uppercase tracking-wider mb-1">Exception Justification</p>
+                  <p className="text-sm text-amber-800 italic">"{claim.exception_justification}"</p>
+                </div>
+              )}
+
+              {/* Partial claim note */}
+              {claim.partial_claim && (
+                <div className="mx-5 mb-3 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
+                  <p className="text-[11px] font-bold text-blue-500 uppercase tracking-wider mb-1">Partial Claim</p>
+                  <p className="text-sm text-blue-800">
+                    Claiming <span className="font-bold">£{(claim.claim_amount ?? claim.amount ?? 0).toFixed(2)}</span> of a{' '}
+                    <span className="font-bold">£{(claim.receipt_amount ?? claim.amount ?? 0).toFixed(2)}</span> receipt
+                    {claim.partial_reason && <span className="text-blue-600"> — {claim.partial_reason.replace(/_/g, ' ')}</span>}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* ── Body sections ───────────────────────────────────── */}
