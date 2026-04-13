@@ -309,16 +309,24 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
   const claimNum   = parseFloat(claimAmount) || 0;
   const receiptNum = parseFloat(receiptAmount) || 0;
   const isPartialClaim = ocr !== null && receiptNum > 0 && claimNum > 0 && claimNum < receiptNum;
-  const hasFail    = policyResult?.checks.some(c => c.severity === 'fail') ?? false;
+
+  // Distinguish failure types so we only offer exceptions for amount-limit failures
+  const hasAmountFail  = policyResult?.checks.some(c => c.rule_name === 'Category Limit' && c.severity === 'fail') ?? false;
+  const hasReceiptFail = policyResult?.checks.some(c => c.rule_name === 'Receipt Required' && c.severity === 'fail') ?? false;
+  const hasHardFail    = policyResult?.checks.some(c => c.severity === 'fail' && c.rule_name !== 'Category Limit') ?? false;
 
   const partialReasonValid = !isPartialClaim
     || (partialReason !== '' && (partialReason !== 'other' || partialReasonOther.trim() !== ''));
-  const exceptionValid = !exceptionRequested
-    || (exceptionJustification.trim() !== '' && exceptionConfirmed);
 
+  // Amount fail requires exception to be *actively requested* AND fully filled in — not just "no exception requested"
+  const exceptionFilled = exceptionRequested && exceptionJustification.trim() !== '' && exceptionConfirmed;
+
+  // Receipt failures always block; amount failures require explicit exception; other hard failures always block
   const canSubmit = claimNum > 0
     && partialReasonValid
-    && (!hasFail || exceptionValid)
+    && !hasReceiptFail
+    && !hasHardFail
+    && (!hasAmountFail || exceptionFilled)
     && !submitting;
 
   // ── Animation variants ───────────────────────────────────────────────────
@@ -596,7 +604,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                       <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Claim Amount</label>
                         <div className={`flex items-center border-2 rounded-xl overflow-hidden transition-colors ${
-                          hasFail && !exceptionRequested && claimAmount ? 'border-red-400 bg-red-50' : isPartialClaim ? 'border-amber-300 bg-amber-50 focus-within:border-amber-400' : 'border-gray-200 bg-white focus-within:border-[#2E8B8B]'
+                          hasAmountFail && !exceptionRequested && claimAmount ? 'border-red-400 bg-red-50' : isPartialClaim ? 'border-amber-300 bg-amber-50 focus-within:border-amber-400' : 'border-gray-200 bg-white focus-within:border-[#2E8B8B]'
                         }`}>
                           <span className="pl-3 text-xl font-bold text-gray-400 font-mono select-none">£</span>
                           <input
@@ -616,7 +624,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Amount</label>
                       <div className={`flex items-center border-2 rounded-xl overflow-hidden transition-colors ${
-                        hasFail && !exceptionRequested && claimAmount ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-white focus-within:border-[#2E8B8B]'
+                        hasAmountFail && !exceptionRequested && claimAmount ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-white focus-within:border-[#2E8B8B]'
                       }`}>
                         <span className="pl-4 text-2xl font-bold text-gray-400 font-mono select-none">£</span>
                         <input
@@ -704,8 +712,8 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                           </motion.div>
                         ))}
 
-                        {/* Exception request option when policy fails */}
-                        {hasFail && (
+                        {/* Exception request option — only for amount-limit failures, not receipt/date failures */}
+                        {hasAmountFail && (
                           <AnimatePresence>
                             {!exceptionRequested ? (
                               <motion.div

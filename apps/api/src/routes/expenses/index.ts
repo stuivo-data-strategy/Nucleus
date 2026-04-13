@@ -127,6 +127,14 @@ const expenseRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
         description: body.description ?? '',
         currency: body.currency,
         receipt_url: body.receipt_url,
+        // Partial claim
+        receipt_amount: body.receipt_amount != null ? Number(body.receipt_amount) : undefined,
+        claim_amount:   body.claim_amount   != null ? Number(body.claim_amount)   : undefined,
+        partial_claim:  body.partial_claim  != null ? Boolean(body.partial_claim) : undefined,
+        partial_reason: body.partial_reason,
+        // Exception
+        exception_requested:    body.exception_requested    != null ? Boolean(body.exception_requested) : undefined,
+        exception_justification: body.exception_justification,
       });
       return reply.status(201).send({ status: 'success', data: result });
     } catch (err: any) {

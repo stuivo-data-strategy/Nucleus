@@ -244,12 +244,16 @@ async function seed() {
   ];
   for (const pr of prules) await db.query(`UPSERT ${pr.id} MERGE $data`, { data: cleanData(pr) });
 
+  console.log("Seeding Lisa Thornton (Expenses Auditor)...");
+  await addPerson('person:lisa_thornton', 'Lisa', 'Thornton', 'Expenses Officer', 'job_classification:t3', 'org_unit:finance_div', 'cost_centre:cc3000', 'person:amara_okafor');
+
   console.log("Seeding RBAC roles...");
   const roles = [
     { id: 'role:employee', name: 'employee', permissions: ['expenses:create:own', 'expenses:read:own', 'org:read:all', 'people:read:basic'] },
     { id: 'role:manager', name: 'manager', permissions: ['expenses:approve:team', 'people:read:team'] },
     { id: 'role:hr_admin', name: 'hr_admin', permissions: ['people:read:all', 'people:write:all'] },
     { id: 'role:finance_approver', name: 'finance_approver', permissions: ['expenses:approve:all', 'expenses:read:all'] },
+    { id: 'role:expenses_auditor', name: 'expenses_auditor', permissions: ['expenses:audit:all', 'expenses:read:all'] },
     { id: 'role:system_admin', name: 'system_admin', permissions: ['*:*:*'] }
   ];
   for (const r of roles) await db.query(`UPSERT ${r.id} MERGE $data`, { data: cleanData(r) });
@@ -259,6 +263,7 @@ async function seed() {
   await db.query(`RELATE person:james_morton->has_role->role:manager;`);
   await db.query(`RELATE person:margaret_thornton->has_role->role:system_admin;`);
   await db.query(`RELATE person:amara_okafor->has_role->role:finance_approver;`);
+  await db.query(`RELATE person:lisa_thornton->has_role->role:expenses_auditor;`);
 
   console.log("Seeding Complete!");
   await dbConnection.close();

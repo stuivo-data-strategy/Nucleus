@@ -21,7 +21,8 @@ export default function Sidebar() {
       .catch(() => setPendingApprovals(0));
   }, [user?.sub]);
 
-  const isFinance = user?.roles?.includes('finance_approver');
+  const isFinance  = user?.roles?.includes('finance_approver');
+  const isAuditor  = user?.roles?.includes('expenses_auditor') || user?.roles?.includes('system_admin');
 
   const nav = [
     { title: 'Foundation', items: [
@@ -37,7 +38,8 @@ export default function Sidebar() {
       { name: 'Training', href: '/training', placeholder: true },
       { name: 'Personnel Development', href: '/development', placeholder: true },
       { name: 'Team', href: '/team', placeholder: true },
-      ...(isFinance ? [{ name: 'Finance Export', href: '/finance' }] : []),
+      ...(isFinance  ? [{ name: 'Finance Export', href: '/finance' }] : []),
+      ...(isAuditor  ? [{ name: '🔍 Audit', href: '/audit' }] : []),
     ]},
     { title: 'Admin', items: [
       { name: 'Policy Rules', href: '/policy' },
