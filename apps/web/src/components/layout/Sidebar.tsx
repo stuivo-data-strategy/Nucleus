@@ -23,6 +23,7 @@ export default function Sidebar() {
 
   const isFinance  = user?.roles?.includes('finance_approver');
   const isAuditor  = user?.roles?.includes('expenses_auditor') || user?.roles?.includes('system_admin');
+  const isVat      = user?.roles?.includes('vat_officer') || user?.roles?.includes('finance_approver') || user?.roles?.includes('system_admin');
 
   const nav = [
     { title: 'Foundation', items: [
@@ -40,6 +41,7 @@ export default function Sidebar() {
       { name: 'Team', href: '/team', placeholder: true },
       ...(isFinance  ? [{ name: 'Finance Export', href: '/finance' }] : []),
       ...(isAuditor  ? [{ name: '🔍 Audit', href: '/audit' }] : []),
+      ...(isVat      ? [{ name: '🧾 VAT Recovery', href: '/vat' }] : []),
     ]},
     { title: 'Admin', items: [
       { name: 'Policy Rules', href: '/policy' },
