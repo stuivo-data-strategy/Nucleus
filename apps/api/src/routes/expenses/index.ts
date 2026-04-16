@@ -112,13 +112,13 @@ const expenseRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
       const db = getDb();
       // Fetch vehicles
       const vResult = await db.query(`SELECT * FROM vehicle WHERE owner = $actor`, { actor });
-      const vehicles = vResult[0]?.result || [];
+      const vehicles = (vResult[0] as any)?.result || [];
       // Fetch journeys
       const jResult = await db.query(`SELECT * FROM saved_journey WHERE owner = $actor`, { actor });
-      const saved_journeys = jResult[0]?.result || [];
+      const saved_journeys = (jResult[0] as any)?.result || [];
       // Fetch summary
       const mResult = await db.query(`SELECT * FROM mileage_summary WHERE person = $actor`, { actor });
-      const summary = mResult[0]?.result?.[0] || { total_miles: 0 };
+      const summary = (mResult[0] as any)?.result?.[0] || { total_miles: 0 };
       
       return { 
         status: 'success', 
