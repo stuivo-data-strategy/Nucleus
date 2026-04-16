@@ -281,7 +281,7 @@ function intentToResponseType(intent: Intent): ResponseType {
 
 // ─── Main API ─────────────────────────────────────────────────────────────────
 
-const BASE = 'http://localhost:3001/api/v1';
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
 export async function runQuery(input: string): Promise<ReportResult> {
   const intent = detectIntent(input);

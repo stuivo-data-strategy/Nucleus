@@ -9,7 +9,7 @@ import ClaimDetailModal from '../../components/expenses/ClaimDetailModal';
 
 // ─── API ─────────────────────────────────────────────────────────────────────
 
-const BASE = 'http://localhost:3001/api/v1';
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
 async function apiFetch(endpoint: string, options: RequestInit = {}, userId?: string) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('nucleus_token') : null;

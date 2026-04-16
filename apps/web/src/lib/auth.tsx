@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       try {
           if (!token) {
-              const res = await fetch('http://localhost:3001/api/v1/auth/bypass', {
+              const res = await fetch((process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1') + '/auth/bypass', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ person_id: 'person:sarah_chen' })
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
 
           if (token) {
-            const res = await fetch('http://localhost:3001/api/v1/auth/me', {
+            const res = await fetch((process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1') + '/auth/me', {
               headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           }
 
-          const optRes = await fetch('http://localhost:3001/api/v1/auth/switch-options');
+          const optRes = await fetch((process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1') + '/auth/switch-options');
           if (optRes.ok) {
              const odata = await optRes.json();
              setAvailableUsers(odata.data);
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const switchUser = async (personId: string) => {
     setIsLoading(true);
     try {
-       const res = await fetch('http://localhost:3001/api/v1/auth/bypass', {
+       const res = await fetch((process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1') + '/auth/bypass', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ person_id: personId })

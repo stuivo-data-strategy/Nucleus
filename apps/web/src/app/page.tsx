@@ -6,7 +6,7 @@ import { useAuth } from '../lib/auth';
 import { Card, Avatar, Button, Badge, Skeleton } from '../components/ui/System';
 import NewClaimModal from '../components/expenses/NewClaimModal';
 
-const API = 'http://localhost:3001/api/v1';
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
 function apiFetch(path: string, userId: string, opts: RequestInit = {}) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('nucleus_token') : null;

@@ -70,6 +70,69 @@ const expenseRoutes: FastifyPluginAsync = async (fastify): Promise<void> => {
     return { status: 'success', data: result };
   });
 
+  // ─── POST /calculate-distance ──────────────────────────────────────────────
+
+  fastify.post('/calculate-distance', async (request: any, reply) => {
+    // TODO: replace with Google Maps Distance Matrix API or OS Routes API
+    // Expected incoming: { from: string; to: string }
+    const body = request.body as any;
+    const { from, to } = body;
+    
+    if (!from || !to) {
+      return reply.status(400).send({ status: 'error', message: 'from and to are required' });
+    }
+
+    // Deterministic simulation
+    const seedString = `${from.toLowerCase().trim()}|${to.toLowerCase().trim()}`;
+    let hash = 0;
+    for (let i = 0; i < seedString.length; i++) {
+      hash = (Math.imul(31, hash) + seedString.charCodeAt(i)) | 0;
+    }
+    
+    // Generate a distance between 2 and 280 miles based on hash
+    const pseudoRandom = Math.abs(hash) / 2147483647; // 0 to 1
+    const distanceMiles = Math.round((2 + pseudoRandom * 278) * 10) / 10;
+    const durationMinutes = Math.round(distanceMiles * 1.5 + pseudoRandom * 20);
+
+    return { 
+      status: 'success', 
+      data: { 
+        distanceMiles, 
+        durationMinutes, 
+        route: "M62 · M1 · A1(M)" // mock route
+      } 
+    };
+  });
+
+  // ─── GET /expenses/mileage-profile ─────────────────────────────────────────
+  
+  fastify.get('/mileage-profile', async (request: any, reply) => {
+    const actor = actorId(request);
+    try {
+      const db = getDb();
+      // Fetch vehicles
+      const vResult = await db.query(`SELECT * FROM vehicle WHERE owner = $actor`, { actor });
+      const vehicles = vResult[0]?.result || [];
+      // Fetch journeys
+      const jResult = await db.query(`SELECT * FROM saved_journey WHERE owner = $actor`, { actor });
+      const saved_journeys = jResult[0]?.result || [];
+      // Fetch summary
+      const mResult = await db.query(`SELECT * FROM mileage_summary WHERE person = $actor`, { actor });
+      const summary = mResult[0]?.result?.[0] || { total_miles: 0 };
+      
+      return { 
+        status: 'success', 
+        data: { 
+          vehicles,
+          saved_journeys,
+          total_miles: summary.total_miles
+        } 
+      };
+    } catch(err: any) {
+      return reply.status(500).send({ status: 'error', message: err.message });
+    }
+  });
+
   // ─── GET /expenses/approved ────────────────────────────────────────────────
 
   fastify.get('/approved', async (request: any, reply) => {

@@ -9,10 +9,13 @@ import React, {
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../lib/auth';
+import { ClaimTypeSelector, ClaimType } from './ClaimTypeSelector';
+import { MileageClaimForm } from './MileageClaimForm';
+import { GroupExpenseForm } from './GroupExpenseForm';
 
 // ─── API helper ─────────────────────────────────────────────────────────────
 
-const BASE = 'http://localhost:3001/api/v1';
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
 async function apiFetch(
   endpoint: string,
@@ -127,6 +130,9 @@ interface Props {
 export default function NewClaimModal({ onClose, onSuccess }: Props) {
   const { user } = useAuth();
   const userId = user?.sub || 'person:sarah_chen';
+
+  type ModalScreen = 'select-type' | 'single' | 'batch' | 'group' | 'mileage';
+  const [screen, setScreen] = useState<ModalScreen>('select-type');
 
   // Stage: 1 = scan, 2 = form, 3 = confirm
   const [stage, setStage] = useState<1 | 2 | 3>(1);
@@ -368,7 +374,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-white shrink-0">
             <div className="flex items-center gap-3">
-              {stage === 2 && (
+              {screen === 'single' && stage === 2 && (
                 <button
                   onClick={() => goTo(1)}
                   className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500"
@@ -378,22 +384,45 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                   </svg>
                 </button>
               )}
+              {screen !== 'select-type' && (screen !== 'single' || stage === 1) && (
+                <button
+                  onClick={() => setScreen('select-type')}
+                  className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 group"
+                >
+                  <svg className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+              )}
               <div>
                 <h2 className="text-base font-bold text-[#1B2A4A]">
-                  {stage === 1 && 'New Expense Claim'}
-                  {stage === 2 && 'Review & Submit'}
-                  {stage === 3 && 'Claim Submitted'}
+                  {screen === 'select-type' && 'New Expense Claim'}
+                  {screen === 'single' && stage === 1 && 'Single Receipt'}
+                  {screen === 'single' && stage === 2 && 'Review & Submit'}
+                  {screen === 'single' && stage === 3 && 'Claim Submitted'}
+                  {screen === 'mileage' && 'Mileage Claim'}
+                  {screen === 'group' && 'Group Expense'}
+                  {screen === 'batch' && 'Multiple Receipts'}
                 </h2>
-                <div className="flex gap-1.5 mt-1">
-                  {[1, 2, 3].map(s => (
-                    <div
-                      key={s}
-                      className={`h-1 rounded-full transition-all duration-300 ${
-                        s === stage ? 'w-6 bg-[#2E8B8B]' : s < stage ? 'w-3 bg-[#2E8B8B]/40' : 'w-3 bg-gray-200'
-                      }`}
-                    />
-                  ))}
-                </div>
+                {screen === 'single' && (
+                  <div className="flex gap-1.5 mt-1">
+                    {[1, 2, 3].map(s => (
+                      <div
+                        key={s}
+                        className={`h-1 rounded-full transition-all duration-300 ${
+                          s === stage ? 'w-6 bg-[#2E8B8B]' : s < stage ? 'w-3 bg-[#2E8B8B]/40' : 'w-3 bg-gray-200'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+                {screen !== 'single' && screen !== 'select-type' && (
+                  <div className="mt-1">
+                    <span className="inline-flex py-0.5 px-2 bg-[#2E8B8B]/10 text-[#2E8B8B] text-[10px] font-bold uppercase tracking-wider rounded-md">
+                      {screen}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
             <button
@@ -409,8 +438,32 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
           {/* Stage content */}
           <div className="flex-1 overflow-y-auto">
             <AnimatePresence mode="wait" custom={direction}>
+              {screen === 'select-type' && (
+                <motion.div key="select-type" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.22 }}>
+                  <ClaimTypeSelector onCancel={onClose} onSelect={(type) => setScreen(type)} />
+                </motion.div>
+              )}
+              {screen === 'mileage' && (
+                <motion.div key="mileage" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.22 }} className="h-full">
+                  <MileageClaimForm onCancel={() => setScreen('select-type')} onSuccess={onSuccess} />
+                </motion.div>
+              )}
+              {screen === 'group' && (
+                <motion.div key="group" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.22 }} className="h-full">
+                  <GroupExpenseForm onCancel={() => setScreen('select-type')} onSuccess={onSuccess} />
+                </motion.div>
+              )}
+              {screen === 'batch' && (
+                <motion.div key="batch" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.22 }} className="flex flex-col items-center justify-center p-8 text-center min-h-[420px]">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-2xl">⏳</div>
+                  <h3 className="font-bold text-[#1B2A4A] text-xl">Coming Soon</h3>
+                  <p className="text-sm text-gray-500 mt-2 max-w-sm">Multiple receipt batch claiming is coming soon. Use individual claims for now.</p>
+                  <button onClick={() => setScreen('single')} className="mt-6 text-[#2E8B8B] font-bold text-sm hover:underline">Start single claim →</button>
+                </motion.div>
+              )}
+              
               {/* ── STAGE 1: Scan ─────────────────────────────────────── */}
-              {stage === 1 && (
+              {screen === 'single' && stage === 1 && (
                 <motion.div
                   key="stage1"
                   custom={direction}
@@ -512,7 +565,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
               )}
 
               {/* ── STAGE 2: Form ─────────────────────────────────────── */}
-              {stage === 2 && (
+              {screen === 'single' && stage === 2 && (
                 <motion.div
                   key="stage2"
                   custom={direction}
@@ -958,7 +1011,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
               )}
 
               {/* ── STAGE 3: Confirmation ──────────────────────────────── */}
-              {stage === 3 && (
+              {screen === 'single' && stage === 3 && (
                 <motion.div
                   key="stage3"
                   custom={direction}
@@ -1056,7 +1109,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
 
           {/* Footer CTA */}
           <div className="px-5 py-4 border-t border-gray-100 bg-white shrink-0">
-            {stage === 2 && (
+            {screen === 'single' && stage === 2 && (
               <motion.button
                 whileTap={{ scale: canSubmit ? 0.98 : 1 }}
                 onClick={handleSubmit}
@@ -1088,7 +1141,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
               </motion.button>
             )}
 
-            {stage === 3 && (
+            {screen === 'single' && stage === 3 && (
               <motion.button
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}

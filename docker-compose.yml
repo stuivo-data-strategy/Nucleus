@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    ports:
+      - "8000:8000"
+    command: start --log trace --user root --pass root file:/data/nucleus.db
+    volumes:
+      - surreal_data:/data
+    restart: always
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - SURREAL_URL=ws://surrealdb:8000/rpc
+      - SURREAL_USER=root
+      - SURREAL_PASS=root
+    depends_on:
+      - surrealdb
+    restart: always
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+    depends_on:
+      - api
+    restart: always
+
+volumes:
+  surreal_data:

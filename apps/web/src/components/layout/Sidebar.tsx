@@ -15,7 +15,7 @@ export default function Sidebar() {
     const token = typeof window !== 'undefined' ? localStorage.getItem('nucleus_token') : null;
     const headers: Record<string, string> = { 'x-user-id': user.sub };
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    fetch('http://localhost:3001/api/v1/expenses?role=approver', { headers })
+    fetch((process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1') + '/expenses?role=approver', { headers })
       .then(r => r.json())
       .then(d => setPendingApprovals(d.data?.claims?.length ?? 0))
       .catch(() => setPendingApprovals(0));

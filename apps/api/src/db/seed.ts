@@ -240,9 +240,33 @@ async function seed() {
     { id: 'policy_rule:meals', category: 'meals', max_amount: 75, receipt_threshold: 15, description: 'Meals limit' },
     { id: 'policy_rule:travel', category: 'travel', max_amount: 250, receipt_threshold: 10, description: 'Travel limits including taxis and rail fares' },
     { id: 'policy_rule:accommodation', category: 'accommodation', max_amount: 200, receipt_threshold: 0, description: 'Hotel stay limits per night' },
-    { id: 'policy_rule:supplies', category: 'supplies', max_amount: 150, receipt_threshold: 20, description: 'Office supplies' }
+    { id: 'policy_rule:supplies', category: 'supplies', max_amount: 150, receipt_threshold: 20, description: 'Office supplies' },
+    // Group expense per-head limit (using same category but lower priority / specific check)
+    { id: 'policy_rule:group_meals', name: 'Group Meals — Per Head Limit', category: 'meals', field: 'amount_per_head', operator: 'lte', value: 75.00, severity: 'fail', message: 'Group meals must not exceed £75.00 per person' },
+    // Mileage rate rule
+    { id: 'policy_rule:mileage_rate', name: 'HMRC Mileage Rate 2025-26', category: 'mileage', field: 'mileage_rate', operator: 'lte', value: 0.45, severity: 'fail', message: 'Mileage rate must not exceed the HMRC approved rate of 45p/mile (25p above 10,000 miles)' }
   ];
   for (const pr of prules) await db.query(`UPSERT ${pr.id} MERGE $data`, { data: cleanData(pr) });
+  
+  console.log("Seeding Mileage & Vehicles for Demo User...");
+  const vehicles = [
+    { id: 'vehicle:v1', registration: 'LD68 XBY', make: 'Volkswagen Golf', engine_cc: 1400, fuel_type: 'petrol', owner: DEMO_USER },
+    { id: 'vehicle:v2', registration: 'EA71 KWT', make: 'Tesla Model 3', engine_cc: 0, fuel_type: 'electric', owner: DEMO_USER }
+  ];
+  for (const v of vehicles) await db.query(`UPSERT ${v.id} MERGE $data`, { data: cleanData(v) });
+  // Set relationships
+  await db.query(`RELATE ${DEMO_USER}->owns_vehicle->vehicle:v1;`);
+  await db.query(`RELATE ${DEMO_USER}->owns_vehicle->vehicle:v2;`);
+
+  const journeys = [
+    { id: 'saved_journey:j1', label: 'Home to Manchester Office', from_address: 'WA14 2DT', to_address: 'M2 3AW', distance_miles: 16.5, owner: DEMO_USER },
+    { id: 'saved_journey:j2', label: 'Office to Client Site (Leeds)', from_address: 'M2 3AW', to_address: 'LS1 1UR', distance_miles: 44.2, owner: DEMO_USER },
+    { id: 'saved_journey:j3', label: 'Home to London Office', from_address: 'WA14 2DT', to_address: 'EC2V 7RS', distance_miles: 198.5, owner: DEMO_USER }
+  ];
+  for (const j of journeys) await db.query(`UPSERT ${j.id} MERGE $data`, { data: cleanData(j) });
+
+  await db.query(`UPSERT mileage_summary:sarah_2025 MERGE { person: $p, tax_year: '2025-26', total_miles: 8750.0 };`, { p: DEMO_USER });
+
 
   console.log("Seeding Lisa Thornton (Expenses Auditor)...");
   await addPerson('person:lisa_thornton', 'Lisa', 'Thornton', 'Expenses Officer', 'job_classification:t3', 'org_unit:finance_div', 'cost_centre:cc3000', 'person:amara_okafor');
