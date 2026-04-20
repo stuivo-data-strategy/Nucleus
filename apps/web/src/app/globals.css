@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,19 +7,23 @@
 @layer base {
   :root {
     --background: 210 40% 98%;
-    --foreground: 222.2 47.4% 11.2%;
+    --foreground: 240 100% 10%;
 
-    --navy: 221 47% 20%;      /* #1B2A4A */
-    --teal: 180 50% 36%;      /* #2E8B8B */
+    --navy: 240 100% 16%;     /* #000053 */
+    --mint: 152 100% 71%;     /* #6cffc6 */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
+    --card-foreground: 240 100% 10%;
     --border: 214.3 31.8% 91.4%;
   }
 
   body {
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
     color: hsl(var(--foreground));
     background-color: hsl(var(--background));
+  }
+
+  h1, h2 {
+    font-family: 'Sora', sans-serif;
   }
 }

@@ -17,9 +17,9 @@ import {
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
-const TEAL    = '#2E8B8B';
-const NAVY    = '#1B2A4A';
-const TEAL_10 = '#eaf5f5';
+const TEAL    = '#6cffc6';
+const NAVY    = '#000053';
+const TEAL_10 = '#e8fff5';
 
 const CATEGORY_META: Record<string, { label: string; icon: string; fill: string }> = {
   meals:           { label: 'Meals',          icon: '🍽️', fill: '#f97316' },
@@ -80,8 +80,8 @@ function ChartTooltip({ active, payload, label, mode = 'amount' }: any) {
   const val = payload[0]?.value;
   return (
     <div className="bg-white border border-gray-200 rounded-xl shadow-lg px-3 py-2 text-xs">
-      {label && <p className="font-bold text-[#1B2A4A] mb-1">{label}</p>}
-      <p className="font-mono font-semibold text-[#2E8B8B]">
+      {label && <p className="font-bold text-[#000053] mb-1">{label}</p>}
+      <p className="font-mono font-semibold text-[#000053]">
         {mode === 'amount' ? fmtAmount(val ?? 0) : val}
       </p>
       {payload[0]?.payload?.claims != null && (
@@ -113,7 +113,7 @@ function HBarChart({ data, meta, mode }: { data: any[]; meta: any; mode: 'catego
       {meta?.grandTotal != null && (
         <div className="flex items-baseline gap-2 mb-3">
           <span className="text-xs text-gray-500">Total:</span>
-          <span className="font-mono font-bold text-lg text-[#2E8B8B]">{fmtAmount(meta.grandTotal)}</span>
+          <span className="font-mono font-bold text-lg text-[#000053]">{fmtAmount(meta.grandTotal)}</span>
         </div>
       )}
       <ResponsiveContainer width="100%" height={chartH}>
@@ -200,7 +200,7 @@ function DonutChart({ data, meta }: { data: any[]; meta: any }) {
           </PieChart>
           {/* Centre label */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="font-mono font-black text-2xl text-[#1B2A4A]">{total}</span>
+            <span className="font-mono font-black text-2xl text-[#000053]">{total}</span>
             <span className="text-[10px] text-gray-400 font-semibold">CLAIMS</span>
           </div>
         </div>
@@ -223,7 +223,7 @@ function DonutChart({ data, meta }: { data: any[]; meta: any }) {
                     transition={{ duration: 0.5, delay: 0.2 }}
                   />
                 </div>
-                <span className="font-mono text-xs font-semibold text-[#1B2A4A] w-6 text-right">{r.count}</span>
+                <span className="font-mono text-xs font-semibold text-[#000053] w-6 text-right">{r.count}</span>
                 <span className="text-[10px] text-gray-400 w-10 text-right">{pct}%</span>
               </div>
             );
@@ -244,12 +244,12 @@ function TrendChart({ data, meta }: { data: any[]; meta: any }) {
         <div className="flex items-baseline gap-4 mb-3">
           <div>
             <span className="text-xs text-gray-500">Total spend: </span>
-            <span className="font-mono font-bold text-[#2E8B8B]">{fmtAmount(meta.totalAmount)}</span>
+            <span className="font-mono font-bold text-[#000053]">{fmtAmount(meta.totalAmount)}</span>
           </div>
           {meta.totalClaims != null && (
             <div>
               <span className="text-xs text-gray-500">Claims: </span>
-              <span className="font-mono font-bold text-[#1B2A4A]">{meta.totalClaims}</span>
+              <span className="font-mono font-bold text-[#000053]">{meta.totalClaims}</span>
             </div>
           )}
         </div>
@@ -300,19 +300,19 @@ function SummaryCard({ meta }: { meta: any }) {
       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
         {meta?.valueLabel ?? 'Value'}
       </p>
-      <p className="font-mono font-black text-4xl text-[#2E8B8B] tracking-tight">
+      <p className="font-mono font-black text-4xl text-[#000053] tracking-tight">
         {fmtAmount(meta?.value ?? 0)}
       </p>
       <div className="flex items-center gap-4 mt-4">
         {meta?.claims != null && (
           <div className="text-center">
-            <p className="font-mono font-bold text-xl text-[#1B2A4A]">{meta.claims}</p>
+            <p className="font-mono font-bold text-xl text-[#000053]">{meta.claims}</p>
             <p className="text-[10px] text-gray-400 uppercase tracking-wide">Claims</p>
           </div>
         )}
         {meta?.total != null && meta.total !== meta.value && (
           <div className="text-center">
-            <p className="font-mono font-bold text-xl text-[#1B2A4A]">{fmtAmount(meta.total)}</p>
+            <p className="font-mono font-bold text-xl text-[#000053]">{fmtAmount(meta.total)}</p>
             <p className="text-[10px] text-gray-400 uppercase tracking-wide">Total spend</p>
           </div>
         )}
@@ -349,7 +349,7 @@ function ClaimsTable({ data, meta }: { data: any[]; meta: any }) {
       onClick={() => sort(k)}
       className={`py-2.5 px-3 text-[10px] font-bold uppercase tracking-widest cursor-pointer select-none whitespace-nowrap transition-colors ${
         k === 'amount' ? 'text-right' : 'text-left'
-      } ${sortKey === k ? 'text-[#2E8B8B]' : 'text-gray-400 hover:text-gray-600'}`}
+      } ${sortKey === k ? 'text-[#000053]' : 'text-gray-400 hover:text-gray-600'}`}
     >
       {label} {sortKey === k ? (sortDir === 'asc' ? '↑' : '↓') : ''}
     </th>
@@ -360,12 +360,12 @@ function ClaimsTable({ data, meta }: { data: any[]; meta: any }) {
       {/* Summary strip */}
       {meta?.total != null && (
         <div className="flex items-center gap-3 text-xs text-gray-500 mb-2">
-          <span className="font-semibold text-[#1B2A4A]">{meta.total}</span>
+          <span className="font-semibold text-[#000053]">{meta.total}</span>
           claim{meta.total !== 1 ? 's' : ''}
           {meta.totalAmount != null && (
             <>
               <span className="text-gray-300">·</span>
-              <span className="font-mono font-semibold text-[#2E8B8B]">{fmtAmount(meta.totalAmount)}</span>
+              <span className="font-mono font-semibold text-[#000053]">{fmtAmount(meta.totalAmount)}</span>
               total
             </>
           )}
@@ -375,7 +375,7 @@ function ClaimsTable({ data, meta }: { data: any[]; meta: any }) {
       <div className="overflow-x-auto rounded-xl border border-gray-100">
         <table className="w-full text-xs min-w-[580px]">
           <thead>
-            <tr className="bg-[#1B2A4A]">
+            <tr className="bg-[#000053]">
               <ColHeader label="Date"        k="date" />
               <ColHeader label="Description" k="category" />
               <ColHeader label="Category"    k="category" />
@@ -390,18 +390,18 @@ function ClaimsTable({ data, meta }: { data: any[]; meta: any }) {
               return (
                 <tr
                   key={row.id ?? i}
-                  className={`border-b border-gray-50 hover:bg-[#eaf5f5]/40 transition-colors ${
+                  className={`border-b border-gray-50 hover:bg-[#e8fff5]/40 transition-colors ${
                     i % 2 === 1 ? 'bg-gray-50/40' : 'bg-white'
                   }`}
                 >
                   <td className="py-2.5 px-3 font-mono text-gray-500 whitespace-nowrap">{fmtDate(row.date)}</td>
-                  <td className="py-2.5 px-3 text-[#1B2A4A] max-w-[160px] truncate" title={row.description}>{row.description || '—'}</td>
+                  <td className="py-2.5 px-3 text-[#000053] max-w-[160px] truncate" title={row.description}>{row.description || '—'}</td>
                   <td className="py-2.5 px-3 whitespace-nowrap">
                     <span className="flex items-center gap-1.5 text-gray-600">
                       {catIcon(row.category)} {catLabel(row.category)}
                     </span>
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono font-semibold text-[#1B2A4A] whitespace-nowrap">
+                  <td className="py-2.5 px-3 text-right font-mono font-semibold text-[#000053] whitespace-nowrap">
                     {fmtAmount(row.amount)}
                     {!row.policy_passed && <span className="ml-1 text-red-400" title="Policy concern">⚠</span>}
                   </td>
@@ -448,12 +448,12 @@ function PolicyTimeline({ data }: { data: any[] }) {
             className="flex gap-3"
           >
             <div className="flex flex-col items-center">
-              <div className="w-7 h-7 rounded-full bg-[#1B2A4A]/8 border border-[#1B2A4A]/15 flex items-center justify-center shrink-0 text-sm">⚙️</div>
+              <div className="w-7 h-7 rounded-full bg-[#000053]/8 border border-[#000053]/15 flex items-center justify-center shrink-0 text-sm">⚙️</div>
               {i < data.length - 1 && <div className="w-px flex-1 bg-gray-100 my-1" />}
             </div>
             <div className="flex-1 pb-3">
               <div className="flex items-baseline gap-2 flex-wrap">
-                <span className="text-xs font-bold text-[#1B2A4A]">{catIcon(cat)} {catLabel(cat)} policy updated</span>
+                <span className="text-xs font-bold text-[#000053]">{catIcon(cat)} {catLabel(cat)} policy updated</span>
                 <span className="text-[10px] text-gray-400 font-mono">{fmtDateTime(entry.created_at)}</span>
               </div>
               <p className="text-[11px] text-gray-500 mt-0.5">By {actor}</p>
@@ -469,7 +469,7 @@ function PolicyTimeline({ data }: { data: any[] }) {
                           <span className="font-mono font-bold text-green-600">{typeof newVal === 'number' ? fmtAmount(newVal as number) : String(newVal)}</span>
                         </>
                       ) : (
-                        <span className="font-mono font-bold text-[#1B2A4A]">{typeof newVal === 'number' ? fmtAmount(newVal as number) : String(newVal)}</span>
+                        <span className="font-mono font-bold text-[#000053]">{typeof newVal === 'number' ? fmtAmount(newVal as number) : String(newVal)}</span>
                       )}
                     </div>
                   ))}
@@ -556,7 +556,7 @@ function TypingIndicator() {
 
 function NucleusAvatar() {
   return (
-    <div className="w-8 h-8 rounded-full bg-[#1B2A4A] flex items-center justify-center text-white text-sm font-bold shrink-0 mb-0.5">
+    <div className="w-8 h-8 rounded-full bg-[#000053] flex items-center justify-center text-white text-sm font-bold shrink-0 mb-0.5">
       N
     </div>
   );
@@ -571,7 +571,7 @@ function SuggestionChips({ items, onSelect, compact = false }: {
     <div className={`flex flex-wrap gap-2 ${compact ? '' : 'justify-center'}`}>
       {items.map(s => (
         <button key={s} onClick={() => onSelect(s)}
-          className="px-3 py-1.5 text-xs font-semibold text-[#2E8B8B] bg-[#eaf5f5] border border-[#2E8B8B]/20 rounded-xl hover:bg-[#d4eded] hover:border-[#2E8B8B]/40 transition-colors whitespace-nowrap">
+          className="px-3 py-1.5 text-xs font-semibold text-[#000053] bg-[#e8fff5] border border-[#6cffc6]/20 rounded-xl hover:bg-[#d4eded] hover:border-[#6cffc6]/40 transition-colors whitespace-nowrap">
           {s}
         </button>
       ))}
@@ -645,7 +645,7 @@ export default function ReportsPage() {
       {/* Header */}
       <div className="flex items-center justify-between px-1 py-4 border-b border-gray-100 shrink-0">
         <div>
-          <h1 className="text-2xl font-bold text-[#1B2A4A] tracking-tight">Expense Reports</h1>
+          <h1 className="text-2xl font-bold text-[#000053] tracking-tight">Expense Reports</h1>
           <p className="text-sm text-gray-400 mt-0.5">Query your expense data in plain English</p>
         </div>
         <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-xs font-bold px-3 py-1.5 rounded-xl">
@@ -663,7 +663,7 @@ export default function ReportsPage() {
 
               {msg.from === 'user' ? (
                 <div className="flex justify-end mb-4">
-                  <div className="max-w-[70%] bg-[#1B2A4A] text-white rounded-2xl rounded-br-sm px-4 py-2.5 shadow-sm">
+                  <div className="max-w-[70%] bg-[#000053] text-white rounded-2xl rounded-br-sm px-4 py-2.5 shadow-sm">
                     <p className="text-sm leading-relaxed">{msg.text}</p>
                   </div>
                 </div>
@@ -673,7 +673,7 @@ export default function ReportsPage() {
                   <div className="flex-1 min-w-0">
                     {'text' in msg ? (
                       <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm inline-block max-w-lg">
-                        <p className="text-sm text-[#1B2A4A] leading-relaxed">{msg.text}</p>
+                        <p className="text-sm text-[#000053] leading-relaxed">{msg.text}</p>
                         {msg.showSuggestions && (
                           <div className="mt-3 space-y-2">
                             <SuggestionChips items={WELCOME_SUGGESTIONS} onSelect={s => submit(s)} compact />
@@ -690,10 +690,10 @@ export default function ReportsPage() {
                       <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-sm shadow-sm overflow-hidden max-w-full">
                         {/* Card header */}
                         <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-100" style={{ background: '#f8fafc' }}>
-                          <svg className="w-3.5 h-3.5 text-[#2E8B8B] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <svg className="w-3.5 h-3.5 text-[#000053] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
-                          <span className="text-xs font-bold text-[#1B2A4A] truncate">{msg.label}</span>
+                          <span className="text-xs font-bold text-[#000053] truncate">{msg.label}</span>
                           <div className="ml-auto flex items-center gap-2 shrink-0">
                             {/* Response type badge */}
                             <ResponseTypeBadge type={msg.result.responseType} />
@@ -755,14 +755,14 @@ export default function ReportsPage() {
               placeholder="Ask about expenses, spend totals, policy changes…"
               rows={1}
               disabled={isTyping}
-              className="w-full resize-none rounded-2xl border border-gray-200 px-4 py-3 text-sm text-[#1B2A4A] placeholder-gray-400 focus:outline-none focus:border-[#2E8B8B] focus:ring-1 focus:ring-[#2E8B8B] transition-colors disabled:opacity-50 leading-relaxed"
+              className="w-full resize-none rounded-2xl border border-gray-200 px-4 py-3 text-sm text-[#000053] placeholder-gray-400 focus:outline-none focus:border-[#6cffc6] focus:ring-1 focus:ring-[#6cffc6] transition-colors disabled:opacity-50 leading-relaxed"
               style={{ minHeight: 44, maxHeight: 120 }}
             />
           </div>
           <button
             onClick={() => submit(input)}
             disabled={!input.trim() || isTyping}
-            className="w-11 h-11 rounded-2xl bg-[#1B2A4A] hover:bg-[#2E3F5C] disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors shrink-0"
+            className="w-11 h-11 rounded-2xl bg-[#000053] hover:bg-[#2E3F5C] disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors shrink-0"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
@@ -781,8 +781,8 @@ export default function ReportsPage() {
 
 function ResponseTypeBadge({ type }: { type: string }) {
   const meta: Record<string, { icon: string; label: string; cls: string }> = {
-    table:        { icon: '⊞',  label: 'Table',    cls: 'bg-[#1B2A4A]/8 text-[#1B2A4A]' },
-    bar_chart:    { icon: '▬',  label: 'Bar',      cls: 'bg-[#2E8B8B]/10 text-[#2E8B8B]' },
+    table:        { icon: '⊞',  label: 'Table',    cls: 'bg-[#000053]/8 text-[#000053]' },
+    bar_chart:    { icon: '▬',  label: 'Bar',      cls: 'bg-[#6cffc6]/10 text-[#000053]' },
     donut_chart:  { icon: '◯',  label: 'Donut',    cls: 'bg-purple-50 text-purple-600' },
     line_chart:   { icon: '∿',  label: 'Trend',    cls: 'bg-blue-50 text-blue-600' },
     summary_card: { icon: '#',  label: 'Summary',  cls: 'bg-amber-50 text-amber-600' },

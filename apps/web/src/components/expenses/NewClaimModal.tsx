@@ -395,7 +395,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                 </button>
               )}
               <div>
-                <h2 className="text-base font-bold text-[#1B2A4A]">
+                <h2 className="text-base font-bold text-[#000053]">
                   {screen === 'select-type' && 'New Expense Claim'}
                   {screen === 'single' && stage === 1 && 'Single Receipt'}
                   {screen === 'single' && stage === 2 && 'Review & Submit'}
@@ -410,7 +410,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                       <div
                         key={s}
                         className={`h-1 rounded-full transition-all duration-300 ${
-                          s === stage ? 'w-6 bg-[#2E8B8B]' : s < stage ? 'w-3 bg-[#2E8B8B]/40' : 'w-3 bg-gray-200'
+                          s === stage ? 'w-6 bg-[#6cffc6]' : s < stage ? 'w-3 bg-[#6cffc6]/40' : 'w-3 bg-gray-200'
                         }`}
                       />
                     ))}
@@ -418,7 +418,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                 )}
                 {screen !== 'single' && screen !== 'select-type' && (
                   <div className="mt-1">
-                    <span className="inline-flex py-0.5 px-2 bg-[#2E8B8B]/10 text-[#2E8B8B] text-[10px] font-bold uppercase tracking-wider rounded-md">
+                    <span className="inline-flex py-0.5 px-2 bg-[#6cffc6]/10 text-[#000053] text-[10px] font-bold uppercase tracking-wider rounded-md">
                       {screen}
                     </span>
                   </div>
@@ -456,9 +456,9 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
               {screen === 'batch' && (
                 <motion.div key="batch" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.22 }} className="flex flex-col items-center justify-center p-8 text-center min-h-[420px]">
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-2xl">⏳</div>
-                  <h3 className="font-bold text-[#1B2A4A] text-xl">Coming Soon</h3>
+                  <h3 className="font-bold text-[#000053] text-xl">Coming Soon</h3>
                   <p className="text-sm text-gray-500 mt-2 max-w-sm">Multiple receipt batch claiming is coming soon. Use individual claims for now.</p>
-                  <button onClick={() => setScreen('single')} className="mt-6 text-[#2E8B8B] font-bold text-sm hover:underline">Start single claim →</button>
+                  <button onClick={() => setScreen('single')} className="mt-6 text-[#000053] font-bold text-sm hover:underline">Start single claim →</button>
                 </motion.div>
               )}
               
@@ -492,19 +492,19 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                     >
                       <div className="relative w-28 h-28 flex items-center justify-center">
                         <motion.div
-                          className="absolute inset-0 rounded-full border-4 border-[#2E8B8B]/30"
+                          className="absolute inset-0 rounded-full border-4 border-[#6cffc6]/30"
                           animate={{ scale: [1, 1.15, 1] }}
                           transition={{ repeat: Infinity, duration: 1.4, ease: 'easeInOut' }}
                         />
                         <motion.div
-                          className="absolute inset-2 rounded-full border-4 border-[#2E8B8B]/20"
+                          className="absolute inset-2 rounded-full border-4 border-[#6cffc6]/20"
                           animate={{ scale: [1, 1.1, 1] }}
                           transition={{ repeat: Infinity, duration: 1.4, delay: 0.2, ease: 'easeInOut' }}
                         />
                         <span className="text-5xl">🔍</span>
                       </div>
                       <div className="text-center">
-                        <p className="font-bold text-[#1B2A4A] text-lg">Reading receipt…</p>
+                        <p className="font-bold text-[#000053] text-lg">Reading receipt…</p>
                         <p className="text-sm text-gray-500 mt-1">AI extracting vendor, date & amount</p>
                       </div>
                       <motion.div
@@ -515,7 +515,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                         {[0, 1, 2].map(i => (
                           <div
                             key={i}
-                            className="w-2 h-2 rounded-full bg-[#2E8B8B]"
+                            className="w-2 h-2 rounded-full bg-[#6cffc6]"
                             style={{ animationDelay: `${i * 0.15}s` }}
                           />
                         ))}
@@ -533,16 +533,16 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-full max-w-xs aspect-[3/2] flex flex-col items-center justify-center gap-4 border-2 border-dashed border-[#2E8B8B]/40 rounded-2xl bg-[#eaf5f5] hover:bg-[#d5eeee] hover:border-[#2E8B8B] transition-all cursor-pointer"
+                        className="w-full max-w-xs aspect-[3/2] flex flex-col items-center justify-center gap-4 border-2 border-dashed border-[#6cffc6]/40 rounded-2xl bg-[#e8fff5] hover:bg-[#d5eeee] hover:border-[#6cffc6] transition-all cursor-pointer"
                       >
-                        <div className="w-16 h-16 rounded-full bg-[#2E8B8B]/10 flex items-center justify-center">
-                          <svg className="w-8 h-8 text-[#2E8B8B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <div className="w-16 h-16 rounded-full bg-[#6cffc6]/10 flex items-center justify-center">
+                          <svg className="w-8 h-8 text-[#000053]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
                         </div>
                         <div className="text-center px-4">
-                          <p className="font-bold text-[#1B2A4A] text-base">Tap to scan receipt</p>
+                          <p className="font-bold text-[#000053] text-base">Tap to scan receipt</p>
                           <p className="text-xs text-gray-500 mt-1">We'll extract vendor, date, and amount automatically</p>
                         </div>
                       </motion.button>
@@ -555,7 +555,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
 
                       <button
                         onClick={() => goTo(2)}
-                        className="text-sm font-semibold text-[#2E8B8B] hover:text-[#257373] underline underline-offset-2 transition-colors"
+                        className="text-sm font-semibold text-[#000053] hover:text-[#5ae8b0] underline underline-offset-2 transition-colors"
                       >
                         Enter manually
                       </button>
@@ -582,10 +582,10 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                       initial={{ opacity: 0, y: -8, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       transition={{ type: 'spring', damping: 20, stiffness: 260 }}
-                      className="bg-[#eaf5f5] border border-[#2E8B8B]/20 rounded-xl p-4"
+                      className="bg-[#e8fff5] border border-[#6cffc6]/20 rounded-xl p-4"
                     >
                       <div className="flex items-center justify-between mb-3">
-                        <span className="inline-flex items-center gap-1.5 bg-[#2E8B8B] text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                        <span className="inline-flex items-center gap-1.5 bg-[#6cffc6] text-white text-xs font-bold px-2.5 py-1 rounded-full">
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                           </svg>
@@ -598,19 +598,19 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div>
                           <p className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-0.5">Vendor</p>
-                          <p className="font-semibold text-[#1B2A4A]">{ocr.vendor}</p>
+                          <p className="font-semibold text-[#000053]">{ocr.vendor}</p>
                         </div>
                         <div>
                           <p className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-0.5">Amount</p>
-                          <p className="font-semibold text-[#1B2A4A]">£{ocr.amount.toFixed(2)}</p>
+                          <p className="font-semibold text-[#000053]">£{ocr.amount.toFixed(2)}</p>
                         </div>
                         <div>
                           <p className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-0.5">Date</p>
-                          <p className="font-semibold text-[#1B2A4A]">{ocr.date}</p>
+                          <p className="font-semibold text-[#000053]">{ocr.date}</p>
                         </div>
                         <div>
                           <p className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-0.5">Category</p>
-                          <p className="font-semibold text-[#1B2A4A] capitalize">{ocr.category_suggestion}</p>
+                          <p className="font-semibold text-[#000053] capitalize">{ocr.category_suggestion}</p>
                         </div>
                       </div>
                       <p className="text-xs text-gray-400 mt-3 italic">Tap any field below to edit</p>
@@ -627,8 +627,8 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                           onClick={() => setCategory(cat.key)}
                           className={`flex-none flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border transition-all whitespace-nowrap ${
                             category === cat.key
-                              ? 'bg-[#2E8B8B] text-white border-[#2E8B8B] shadow-sm'
-                              : 'bg-white text-gray-600 border-gray-200 hover:border-[#2E8B8B]/50 hover:text-[#2E8B8B]'
+                              ? 'bg-[#6cffc6] text-white border-[#6cffc6] shadow-sm'
+                              : 'bg-white text-gray-600 border-gray-200 hover:border-[#6cffc6]/50 hover:text-[#000053]'
                           }`}
                         >
                           <span>{cat.emoji}</span>
@@ -657,7 +657,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                       <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Claim Amount</label>
                         <div className={`flex items-center border-2 rounded-xl overflow-hidden transition-colors ${
-                          hasAmountFail && !exceptionRequested && claimAmount ? 'border-red-400 bg-red-50' : isPartialClaim ? 'border-amber-300 bg-amber-50 focus-within:border-amber-400' : 'border-gray-200 bg-white focus-within:border-[#2E8B8B]'
+                          hasAmountFail && !exceptionRequested && claimAmount ? 'border-red-400 bg-red-50' : isPartialClaim ? 'border-amber-300 bg-amber-50 focus-within:border-amber-400' : 'border-gray-200 bg-white focus-within:border-[#6cffc6]'
                         }`}>
                           <span className="pl-3 text-xl font-bold text-gray-400 font-mono select-none">£</span>
                           <input
@@ -665,10 +665,10 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                             value={claimAmount}
                             onChange={e => setClaimAmount(e.target.value)}
                             placeholder="0.00"
-                            className="flex-1 px-2 py-3 text-xl font-bold font-mono text-[#1B2A4A] bg-transparent outline-none placeholder:text-gray-300"
+                            className="flex-1 px-2 py-3 text-xl font-bold font-mono text-[#000053] bg-transparent outline-none placeholder:text-gray-300"
                           />
                           {policyLoading && (
-                            <span className="pr-3 animate-spin border-2 border-[#2E8B8B] border-t-transparent rounded-full w-4 h-4 shrink-0" />
+                            <span className="pr-3 animate-spin border-2 border-[#6cffc6] border-t-transparent rounded-full w-4 h-4 shrink-0" />
                           )}
                         </div>
                       </div>
@@ -677,7 +677,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                     <div>
                       <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Amount</label>
                       <div className={`flex items-center border-2 rounded-xl overflow-hidden transition-colors ${
-                        hasAmountFail && !exceptionRequested && claimAmount ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-white focus-within:border-[#2E8B8B]'
+                        hasAmountFail && !exceptionRequested && claimAmount ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-white focus-within:border-[#6cffc6]'
                       }`}>
                         <span className="pl-4 text-2xl font-bold text-gray-400 font-mono select-none">£</span>
                         <input
@@ -685,10 +685,10 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                           value={claimAmount}
                           onChange={e => { setClaimAmount(e.target.value); setReceiptAmount(e.target.value); }}
                           placeholder="0.00"
-                          className="flex-1 px-2 py-4 text-2xl font-bold font-mono text-[#1B2A4A] bg-transparent outline-none placeholder:text-gray-300"
+                          className="flex-1 px-2 py-4 text-2xl font-bold font-mono text-[#000053] bg-transparent outline-none placeholder:text-gray-300"
                         />
                         {policyLoading && (
-                          <span className="pr-4 animate-spin border-2 border-[#2E8B8B] border-t-transparent rounded-full w-4 h-4 shrink-0" />
+                          <span className="pr-4 animate-spin border-2 border-[#6cffc6] border-t-transparent rounded-full w-4 h-4 shrink-0" />
                         )}
                       </div>
                     </div>
@@ -712,7 +712,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                             <select
                               value={partialReason}
                               onChange={e => setPartialReason(e.target.value)}
-                              className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm text-[#1B2A4A] bg-white focus:outline-none focus:border-amber-500"
+                              className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm text-[#000053] bg-white focus:outline-none focus:border-amber-500"
                             >
                               <option value="">Select a reason…</option>
                               <option value="personal_guest">Personal guest included</option>
@@ -727,7 +727,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                               value={partialReasonOther}
                               onChange={e => setPartialReasonOther(e.target.value)}
                               placeholder="Please describe the reason…"
-                              className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm text-[#1B2A4A] bg-white focus:outline-none focus:border-amber-500 placeholder:text-amber-400"
+                              className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm text-[#000053] bg-white focus:outline-none focus:border-amber-500 placeholder:text-amber-400"
                             />
                           )}
                         </div>
@@ -812,7 +812,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                                     onChange={e => setExceptionJustification(e.target.value)}
                                     placeholder="Business justification — e.g. client lunch ran over budget due to extended meeting…"
                                     rows={3}
-                                    className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm text-[#1B2A4A] bg-white focus:outline-none focus:border-amber-500 resize-none placeholder:text-amber-400"
+                                    className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm text-[#000053] bg-white focus:outline-none focus:border-amber-500 resize-none placeholder:text-amber-400"
                                   />
                                   <label className="flex items-start gap-2.5 cursor-pointer">
                                     <input
@@ -842,7 +842,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                       value={description}
                       onChange={e => setDescription(e.target.value)}
                       placeholder="What was this expense for?"
-                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1B2A4A] focus:outline-none focus:border-[#2E8B8B] transition-colors bg-white placeholder:text-gray-300"
+                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm text-[#000053] focus:outline-none focus:border-[#6cffc6] transition-colors bg-white placeholder:text-gray-300"
                     />
                   </div>
 
@@ -854,7 +854,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                       value={date}
                       max={new Date().toISOString().split('T')[0]}
                       onChange={e => setDate(e.target.value)}
-                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1B2A4A] focus:outline-none focus:border-[#2E8B8B] transition-colors bg-white"
+                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm text-[#000053] focus:outline-none focus:border-[#6cffc6] transition-colors bg-white"
                     />
                   </div>
 
@@ -889,7 +889,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                         <p className="text-[11px] text-gray-400 mt-0.5">Resolved from organisation structure</p>
                       </div>
                       {routeLoading && (
-                        <span className="animate-spin border-2 border-[#2E8B8B] border-t-transparent rounded-full w-4 h-4" />
+                        <span className="animate-spin border-2 border-[#6cffc6] border-t-transparent rounded-full w-4 h-4" />
                       )}
                     </div>
 
@@ -909,14 +909,14 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                               transition={{ delay: i * 0.08 }}
                               className="flex items-center gap-3"
                             >
-                              <div className="w-7 h-7 rounded-full bg-[#2E8B8B] text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
+                              <div className="w-7 h-7 rounded-full bg-[#6cffc6] text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">
                                 {i + 1}
                               </div>
-                              <div className="w-9 h-9 rounded-full bg-[#1B2A4A] text-white text-xs font-bold flex items-center justify-center shrink-0">
+                              <div className="w-9 h-9 rounded-full bg-[#000053] text-white text-xs font-bold flex items-center justify-center shrink-0">
                                 {step.avatar_initials}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-sm font-bold text-[#1B2A4A] leading-tight">
+                                <p className="text-sm font-bold text-[#000053] leading-tight">
                                   {step.first_name} {step.last_name}
                                   {step.role_label && (
                                     <span className="ml-1.5 font-normal text-gray-500">— {step.role_label}</span>
@@ -951,7 +951,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                             <div className="mt-3 pt-3 border-t border-gray-100">
                               <button
                                 onClick={() => setShowResolutionLog(v => !v)}
-                                className="flex items-center gap-1.5 text-xs font-semibold text-[#2E8B8B] hover:text-[#257373] transition-colors"
+                                className="flex items-center gap-1.5 text-xs font-semibold text-[#000053] hover:text-[#5ae8b0] transition-colors"
                               >
                                 <svg
                                   className={`w-3.5 h-3.5 transition-transform ${showResolutionLog ? 'rotate-90' : ''}`}
@@ -971,7 +971,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                                     transition={{ duration: 0.2 }}
                                     className="overflow-hidden"
                                   >
-                                    <div className="mt-2 bg-[#1B2A4A]/3 rounded-lg p-3 space-y-1">
+                                    <div className="mt-2 bg-[#000053]/3 rounded-lg p-3 space-y-1">
                                       {routePreview.resolution_log.map((line, i) => (
                                         <p
                                           key={i}
@@ -979,7 +979,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                                             line === '---'
                                               ? 'border-t border-gray-200 my-1'
                                               : line.startsWith('  ')
-                                              ? 'text-[#2E8B8B] pl-3'
+                                              ? 'text-[#000053] pl-3'
                                               : 'text-gray-600'
                                           }`}
                                         >
@@ -1053,7 +1053,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.45 }}
                   >
-                    <h3 className="text-2xl font-bold text-[#1B2A4A]">Claim Submitted</h3>
+                    <h3 className="text-2xl font-bold text-[#000053]">Claim Submitted</h3>
                     <p className="text-gray-500 mt-2">
                       {confirmedClaim?.workflow?.steps?.[0]
                         ? `Routed to ${confirmedClaim.workflow.steps[0].approver_name} for approval`
@@ -1071,19 +1071,19 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                     >
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500 font-medium">Reference</span>
-                        <span className="font-bold text-[#1B2A4A] font-mono">
+                        <span className="font-bold text-[#000053] font-mono">
                           {confirmedClaim.claim?.reference || '—'}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500 font-medium">Amount</span>
-                        <span className="font-bold text-[#1B2A4A]">
+                        <span className="font-bold text-[#000053]">
                           £{claimNum.toFixed(2)}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500 font-medium">Category</span>
-                        <span className="font-bold text-[#1B2A4A] capitalize">{category}</span>
+                        <span className="font-bold text-[#000053] capitalize">{category}</span>
                       </div>
                       {confirmedClaim.workflow?.steps?.length > 0 && (
                         <div className="pt-2 border-t border-gray-200">
@@ -1091,7 +1091,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                           <div className="space-y-1.5">
                             {confirmedClaim.workflow.steps.map((s: any, i: number) => (
                               <div key={i} className="flex items-center gap-2 text-sm">
-                                <div className="w-5 h-5 rounded-full bg-[#2E8B8B] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+                                <div className="w-5 h-5 rounded-full bg-[#6cffc6] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
                                   {i + 1}
                                 </div>
                                 <span className="text-gray-700 font-medium">{s.approver_name}</span>
@@ -1118,7 +1118,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                   canSubmit
                     ? exceptionRequested
                       ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-md shadow-amber-500/20'
-                      : 'bg-[#2E8B8B] text-white hover:bg-[#257373] shadow-md shadow-[#2E8B8B]/20'
+                      : 'bg-[#6cffc6] text-white hover:bg-[#5ae8b0] shadow-md shadow-[#6cffc6]/20'
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
               >
@@ -1147,7 +1147,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7 }}
                 onClick={onClose}
-                className="w-full h-12 rounded-xl text-base font-bold bg-[#1B2A4A] text-white hover:bg-[#253966] transition-colors"
+                className="w-full h-12 rounded-xl text-base font-bold bg-[#000053] text-white hover:bg-[#253966] transition-colors"
               >
                 Done
               </motion.button>

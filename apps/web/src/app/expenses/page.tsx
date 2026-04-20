@@ -76,7 +76,7 @@ function StatusTracker({
       case 'approved': return { ring: 'bg-green-500 text-white',  line: 'bg-green-300',  icon: '✓' };
       case 'rejected': return { ring: 'bg-red-500 text-white',    line: 'bg-red-300',    icon: '✗' };
       case 'queried':  return { ring: 'bg-purple-500 text-white', line: 'bg-purple-300', icon: '?' };
-      case 'pending':  return { ring: 'bg-[#2E8B8B] text-white',  line: 'bg-[#2E8B8B]/30', icon: null };
+      case 'pending':  return { ring: 'bg-[#6cffc6] text-white',  line: 'bg-[#6cffc6]/30', icon: null };
       default:         return { ring: 'bg-gray-200 text-gray-400',line: 'bg-gray-100',   icon: null };
     }
   }
@@ -200,14 +200,14 @@ export default function ExpensesPage() {
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-bold text-[#1B2A4A] tracking-tight">My Expenses</h1>
+          <h1 className="text-3xl font-bold text-[#000053] tracking-tight">My Expenses</h1>
           <p className="text-gray-500 mt-1 text-sm">
             {loading ? 'Loading…' : `${claims.length} claim${claims.length !== 1 ? 's' : ''} total`}
           </p>
         </div>
         <button
           onClick={() => setShowNewClaim(true)}
-          className="hidden sm:flex items-center gap-2 bg-[#2E8B8B] text-white px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#257373] transition-colors shadow-sm shadow-[#2E8B8B]/20"
+          className="hidden sm:flex items-center gap-2 bg-[#6cffc6] text-white px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#5ae8b0] transition-colors shadow-sm shadow-[#6cffc6]/20"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -220,7 +220,7 @@ export default function ExpensesPage() {
       <div className="grid grid-cols-2 gap-4">
         <Card className="p-5 border-gray-200 shadow-sm">
           <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">This Month</p>
-          <p className="text-2xl font-bold text-[#1B2A4A] font-mono">
+          <p className="text-2xl font-bold text-[#000053] font-mono">
             £{thisMonth.reduce((s, c) => s + (c.amount ?? 0), 0).toFixed(2)}
           </p>
           <p className="text-xs text-gray-500 mt-1">
@@ -248,18 +248,18 @@ export default function ExpensesPage() {
       ) : error ? (
         <Card className="p-8 text-center border-gray-200">
           <p className="text-red-500 font-medium">{error}</p>
-          <button onClick={fetchClaims} className="mt-3 text-sm font-semibold text-[#2E8B8B] hover:underline">
+          <button onClick={fetchClaims} className="mt-3 text-sm font-semibold text-[#000053] hover:underline">
             Try again
           </button>
         </Card>
       ) : claims.length === 0 ? (
         <Card className="p-12 text-center border-gray-200">
           <p className="text-4xl mb-3">📋</p>
-          <p className="font-bold text-[#1B2A4A]">No claims yet</p>
+          <p className="font-bold text-[#000053]">No claims yet</p>
           <p className="text-sm text-gray-500 mt-1">Submit your first expense to get started.</p>
           <button
             onClick={() => setShowNewClaim(true)}
-            className="mt-4 text-sm font-semibold text-[#2E8B8B] hover:underline"
+            className="mt-4 text-sm font-semibold text-[#000053] hover:underline"
           >
             Submit a claim →
           </button>
@@ -290,7 +290,7 @@ export default function ExpensesPage() {
                     <div className="flex items-start gap-3 min-w-0">
                       <span className="text-2xl shrink-0 mt-0.5">{cat.emoji}</span>
                       <div className="min-w-0">
-                        <p className="font-bold text-[#1B2A4A] truncate leading-snug">
+                        <p className="font-bold text-[#000053] truncate leading-snug">
                           {claim.description || cat.label}
                         </p>
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
@@ -301,7 +301,7 @@ export default function ExpensesPage() {
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-lg font-bold font-mono text-[#1B2A4A]">
+                      <p className="text-lg font-bold font-mono text-[#000053]">
                         £{(claim.amount ?? 0).toFixed(2)}
                       </p>
                       <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 ${st.pill}`}>
@@ -374,7 +374,7 @@ export default function ExpensesPage() {
         whileHover={{ scale: 1.07 }}
         whileTap={{ scale: 0.93 }}
         onClick={() => setShowNewClaim(true)}
-        className="fixed bottom-8 right-6 sm:hidden w-14 h-14 bg-[#2E8B8B] text-white rounded-full shadow-xl flex items-center justify-center text-3xl font-light z-40"
+        className="fixed bottom-8 right-6 sm:hidden w-14 h-14 bg-[#6cffc6] text-white rounded-full shadow-xl flex items-center justify-center text-3xl font-light z-40"
         aria-label="New claim"
       >
         +

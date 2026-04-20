@@ -245,7 +245,7 @@ export function MileageClaimForm({ onSuccess, onCancel }: MileageClaimFormProps)
                 <button
                   key={j.id}
                   onClick={() => selectJourney(j)}
-                  className="flex-none bg-gray-50 border border-gray-200 hover:border-[#2E8B8B]/50 hover:bg-[#2E8B8B]/5 px-3 py-1.5 rounded-full text-xs font-semibold text-gray-600 transition-colors"
+                  className="flex-none bg-gray-50 border border-gray-200 hover:border-[#6cffc6]/50 hover:bg-[#6cffc6]/5 px-3 py-1.5 rounded-full text-xs font-semibold text-gray-600 transition-colors"
                 >
                   {j.label}
                 </button>
@@ -263,7 +263,7 @@ export function MileageClaimForm({ onSuccess, onCancel }: MileageClaimFormProps)
               value={fromAddress}
               onChange={e => { setFromAddress(e.target.value); setDistanceMiles(null); }}
               placeholder="Postcode or Address"
-              className="w-full border-2 border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#2E8B8B] bg-white transition-colors"
+              className="w-full border-2 border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#6cffc6] bg-white transition-colors"
             />
           </div>
           <div>
@@ -273,7 +273,7 @@ export function MileageClaimForm({ onSuccess, onCancel }: MileageClaimFormProps)
               value={toAddress}
               onChange={e => { setToAddress(e.target.value); setDistanceMiles(null); }}
               placeholder="Postcode or Address"
-              className="w-full border-2 border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#2E8B8B] bg-white transition-colors"
+              className="w-full border-2 border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#6cffc6] bg-white transition-colors"
             />
           </div>
 
@@ -283,7 +283,7 @@ export function MileageClaimForm({ onSuccess, onCancel }: MileageClaimFormProps)
                 type="checkbox"
                 checked={returnJourney}
                 onChange={e => setReturnJourney(e.target.checked)}
-                className="w-4 h-4 accent-[#2E8B8B]"
+                className="w-4 h-4 accent-[#6cffc6]"
               />
               <span className="text-sm font-semibold text-gray-700">Return journey</span>
             </label>
@@ -291,7 +291,7 @@ export function MileageClaimForm({ onSuccess, onCancel }: MileageClaimFormProps)
             <button
               onClick={handleCalculate}
               disabled={!fromAddress || !toAddress || calculating}
-              className="px-4 py-2 bg-[#2E8B8B] text-white rounded-lg text-xs font-bold hover:bg-[#257373] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+              className="px-4 py-2 bg-[#6cffc6] text-white rounded-lg text-xs font-bold hover:bg-[#5ae8b0] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
             >
               {calculating ? 'Calculating...' : 'Calculate Distance'}
             </button>
@@ -306,9 +306,9 @@ export function MileageClaimForm({ onSuccess, onCancel }: MileageClaimFormProps)
                 exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden pt-2"
               >
-                <div className="bg-[#eaf5f5] text-[#2E8B8B] p-3 rounded-lg flex items-center justify-between border border-[#2E8B8B]/20">
+                <div className="bg-[#e8fff5] text-[#000053] p-3 rounded-lg flex items-center justify-between border border-[#6cffc6]/20">
                   <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-[#2E8B8B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-5 h-5 text-[#000053]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
                     <span className="font-bold text-sm">
@@ -336,14 +336,14 @@ export function MileageClaimForm({ onSuccess, onCancel }: MileageClaimFormProps)
             )}
 
             <div className="flex items-center justify-between bg-white border-2 border-gray-100 p-4 rounded-xl shadow-sm relative overflow-hidden">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#2E8B8B]"></div>
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#6cffc6]"></div>
               <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Claim Value</p>
                 <p className="text-sm font-medium text-gray-600 mt-0.5">
                   {(returnJourney ? distanceMiles * 2 : distanceMiles)} miles × {rateApplied}
                 </p>
               </div>
-              <div className="text-2xl font-black text-[#1B2A4A] font-mono">
+              <div className="text-2xl font-black text-[#000053] font-mono">
                 £{calculatedAmount.toFixed(2)}
               </div>
             </div>
@@ -354,7 +354,7 @@ export function MileageClaimForm({ onSuccess, onCancel }: MileageClaimFormProps)
         <div>
           <div className="flex justify-between items-end mb-2">
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Vehicle</label>
-            <button className="text-[11px] font-bold text-[#2E8B8B] hover:underline">Add Vehicle</button>
+            <button className="text-[11px] font-bold text-[#000053] hover:underline">Add Vehicle</button>
           </div>
           <div className="flex flex-col gap-2">
             {vehicles.map(v => (
@@ -362,18 +362,18 @@ export function MileageClaimForm({ onSuccess, onCancel }: MileageClaimFormProps)
                 key={v.id}
                 onClick={() => setSelectedVehicle(v.id)}
                 className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
-                  selectedVehicle === v.id ? 'border-[#2E8B8B] bg-[#2E8B8B]/5' : 'border-gray-100 hover:border-gray-200'
+                  selectedVehicle === v.id ? 'border-[#6cffc6] bg-[#6cffc6]/5' : 'border-gray-100 hover:border-gray-200'
                 }`}
               >
                 <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-gray-400">
                   {v.fuel_type === 'electric' ? '⚡' : '⛽'}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-bold text-[#1B2A4A] leading-tight">{v.registration}</p>
+                  <p className="text-sm font-bold text-[#000053] leading-tight">{v.registration}</p>
                   <p className="text-[11px] text-gray-500">{v.make} • {v.engine_cc ? `${v.engine_cc}cc` : ''} {v.fuel_type}</p>
                 </div>
                 {selectedVehicle === v.id && (
-                  <svg className="w-5 h-5 text-[#2E8B8B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <svg className="w-5 h-5 text-[#000053]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 )}
@@ -390,7 +390,7 @@ export function MileageClaimForm({ onSuccess, onCancel }: MileageClaimFormProps)
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder="Reason for travel..."
-            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#2E8B8B]"
+            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#6cffc6]"
           />
         </div>
 
@@ -400,7 +400,7 @@ export function MileageClaimForm({ onSuccess, onCancel }: MileageClaimFormProps)
             type="date"
             value={date}
             onChange={e => setDate(e.target.value)}
-            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#2E8B8B]"
+            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#6cffc6]"
           />
         </div>
 
@@ -437,10 +437,10 @@ export function MileageClaimForm({ onSuccess, onCancel }: MileageClaimFormProps)
                   <div className="space-y-3">
                     {routePreview.steps.map((step: any, i: number) => (
                       <div key={step.person_id} className="flex items-center gap-3">
-                        <div className="w-7 h-7 rounded-full bg-[#2E8B8B] text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">{i + 1}</div>
-                        <div className="w-9 h-9 rounded-full bg-[#1B2A4A] text-white text-xs font-bold flex items-center justify-center shrink-0">{step.avatar_initials}</div>
+                        <div className="w-7 h-7 rounded-full bg-[#6cffc6] text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-sm">{i + 1}</div>
+                        <div className="w-9 h-9 rounded-full bg-[#000053] text-white text-xs font-bold flex items-center justify-center shrink-0">{step.avatar_initials}</div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-bold text-[#1B2A4A] leading-tight">{step.first_name} {step.last_name}</p>
+                          <p className="text-sm font-bold text-[#000053] leading-tight">{step.first_name} {step.last_name}</p>
                           <p className="text-xs text-gray-400">{step.job_title}</p>
                         </div>
                       </div>
@@ -461,7 +461,7 @@ export function MileageClaimForm({ onSuccess, onCancel }: MileageClaimFormProps)
           disabled={!canSubmit}
           className={`w-full h-12 rounded-xl text-base font-bold flex items-center justify-center gap-2 transition-all ${
             canSubmit
-              ? 'bg-[#2E8B8B] text-white hover:bg-[#257373] shadow-md shadow-[#2E8B8B]/20'
+              ? 'bg-[#6cffc6] text-white hover:bg-[#5ae8b0] shadow-md shadow-[#6cffc6]/20'
               : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           }`}
         >

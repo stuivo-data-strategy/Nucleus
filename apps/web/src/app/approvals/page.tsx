@@ -201,8 +201,8 @@ function ApproverContext({ currentStep, roleLabel, resolutionLog }: {
   );
 
   return (
-    <div className="bg-[#2E8B8B]/5 border border-[#2E8B8B]/20 rounded-xl px-4 py-3 space-y-1">
-      <p className="text-xs text-[#2E8B8B] font-semibold">
+    <div className="bg-[#6cffc6]/5 border border-[#6cffc6]/20 rounded-xl px-4 py-3 space-y-1">
+      <p className="text-xs text-[#000053] font-semibold">
         You are reviewing as:{' '}
         <span className="font-bold">
           {roleLabel || 'Approver'}
@@ -213,7 +213,7 @@ function ApproverContext({ currentStep, roleLabel, resolutionLog }: {
         <>
           <button
             onClick={() => setExpanded(v => !v)}
-            className="flex items-center gap-1 text-[11px] text-[#2E8B8B]/70 hover:text-[#2E8B8B] transition-colors"
+            className="flex items-center gap-1 text-[11px] text-[#000053]/70 hover:text-[#000053] transition-colors"
           >
             <svg
               className={`w-3 h-3 transition-transform ${expanded ? 'rotate-90' : ''}`}
@@ -233,7 +233,7 @@ function ApproverContext({ currentStep, roleLabel, resolutionLog }: {
                 transition={{ duration: 0.15 }}
                 className="overflow-hidden"
               >
-                <p className="text-[11px] font-mono text-[#2E8B8B]/80 pt-1 leading-relaxed">
+                <p className="text-[11px] font-mono text-[#000053]/80 pt-1 leading-relaxed">
                   {currentStep.resolution_path}
                 </p>
               </motion.div>
@@ -435,16 +435,16 @@ function ApprovalCard({ claim, userId, onDismiss, onRequestReject }: ApprovalCar
             <div className="p-5 pb-0">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-[#1B2A4A] text-white text-sm font-bold flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-[#000053] text-white text-sm font-bold flex items-center justify-center shrink-0">
                     {claim.claimant_initials ?? '??'}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-[#1B2A4A] leading-tight">{claim.claimant_name ?? '—'}</p>
+                    <p className="font-bold text-[#000053] leading-tight">{claim.claimant_name ?? '—'}</p>
                     <p className="text-xs text-gray-400 truncate">{claim.claimant_job_title ?? ''}</p>
                   </div>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-xl font-bold font-mono text-[#1B2A4A]">
+                  <p className="text-xl font-bold font-mono text-[#000053]">
                     £{(claim.amount ?? 0).toFixed(2)}
                   </p>
                   <p className="text-xs font-mono text-gray-400 mt-0.5">{claim.reference}</p>
@@ -674,7 +674,7 @@ function RejectModal({
             </svg>
           </div>
           <div>
-            <h3 className="font-bold text-[#1B2A4A]">Reject Claim</h3>
+            <h3 className="font-bold text-[#000053]">Reject Claim</h3>
             <p className="text-sm text-gray-500">
               {claim.claimant_name} · £{(claim.amount ?? 0).toFixed(2)} · {claim.reference}
             </p>
@@ -690,7 +690,7 @@ function RejectModal({
             onChange={e => { setReason(e.target.value); setError(''); }}
             placeholder="Explain why this claim is being rejected…"
             rows={3}
-            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1B2A4A] focus:outline-none focus:border-red-400 resize-none transition-colors bg-white placeholder:text-gray-300"
+            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm text-[#000053] focus:outline-none focus:border-red-400 resize-none transition-colors bg-white placeholder:text-gray-300"
             autoFocus
           />
           {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
@@ -834,7 +834,7 @@ export default function ApprovalsPage() {
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div>
-        <h1 className="text-3xl font-bold text-[#1B2A4A] tracking-tight">Approvals</h1>
+        <h1 className="text-3xl font-bold text-[#000053] tracking-tight">Approvals</h1>
         <p className="text-gray-500 mt-1 text-sm">
           {loading ? 'Loading…'
             : visibleClaims.length > 0
@@ -847,7 +847,7 @@ export default function ApprovalsPage() {
       <div className="grid grid-cols-2 gap-4">
         <Card className="p-5 border-gray-200 shadow-sm">
           <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Awaiting Review</p>
-          <p className="text-2xl font-bold text-[#1B2A4A] font-mono">
+          <p className="text-2xl font-bold text-[#000053] font-mono">
             £{visibleClaims.reduce((s, c) => s + (c.amount ?? 0), 0).toFixed(2)}
           </p>
           <p className="text-xs text-gray-500 mt-1">{visibleClaims.length} claim{visibleClaims.length !== 1 ? 's' : ''}</p>
@@ -871,7 +871,7 @@ export default function ApprovalsPage() {
       ) : error ? (
         <Card className="p-8 text-center border-gray-200">
           <p className="text-red-500 font-medium">{error}</p>
-          <button onClick={fetchClaims} className="mt-3 text-sm font-semibold text-[#2E8B8B] hover:underline">
+          <button onClick={fetchClaims} className="mt-3 text-sm font-semibold text-[#000053] hover:underline">
             Try again
           </button>
         </Card>
@@ -888,7 +888,7 @@ export default function ApprovalsPage() {
             </svg>
           </div>
           <div className="text-center">
-            <p className="font-bold text-[#1B2A4A] text-lg">All caught up</p>
+            <p className="font-bold text-[#000053] text-lg">All caught up</p>
             <p className="text-sm text-gray-500 mt-1">No claims waiting for your approval.</p>
           </div>
         </motion.div>
@@ -921,7 +921,7 @@ export default function ApprovalsPage() {
               animate={{ opacity: 1 }}
               className="bg-white border border-gray-200 rounded-xl p-4 space-y-2"
             >
-              <div className="flex justify-between text-sm font-semibold text-[#1B2A4A]">
+              <div className="flex justify-between text-sm font-semibold text-[#000053]">
                 <span>Approving {batchProgress.current} of {batchProgress.total}…</span>
                 <span className="text-gray-400">{Math.round((batchProgress.current / batchProgress.total) * 100)}%</span>
               </div>
@@ -995,7 +995,7 @@ export default function ApprovalsPage() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 24 }}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#1B2A4A] text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-lg z-50 whitespace-nowrap"
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#000053] text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-lg z-50 whitespace-nowrap"
           >
             ✓ {toast}
           </motion.div>

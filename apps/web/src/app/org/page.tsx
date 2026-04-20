@@ -106,7 +106,7 @@ function ExpensesSection({ personId }: { personId: string }) {
           { label: 'Approved',    value: String(approved),   mono: false },
         ].map(s => (
           <div key={s.label} className="bg-gray-50 rounded-lg px-2.5 py-2 text-center">
-            <p className={`text-sm font-bold text-[#1B2A4A] truncate ${s.mono ? 'font-mono text-xs' : ''}`}>
+            <p className={`text-sm font-bold text-[#000053] truncate ${s.mono ? 'font-mono text-xs' : ''}`}>
               {s.value}
             </p>
             <p className="text-[9px] text-gray-400 font-semibold uppercase tracking-wide mt-0.5">
@@ -135,13 +135,13 @@ function ExpensesSection({ personId }: { personId: string }) {
             >
               <span className="text-base shrink-0 leading-none">{icon}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-[#1B2A4A] truncate">
+                <p className="text-xs font-medium text-[#000053] truncate">
                   {c.description || c.category}
                 </p>
                 <p className="text-[10px] text-gray-400">{fmtShortDate(c.date)}</p>
               </div>
               <div className="text-right shrink-0">
-                <p className="font-mono text-xs font-bold text-[#1B2A4A]">
+                <p className="font-mono text-xs font-bold text-[#000053]">
                   {fmtCurrency(c.amount ?? 0)}
                 </p>
                 <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${stCls}`}>
@@ -199,9 +199,9 @@ function ActivitySection({
       >
         <div className="flex items-center gap-2">
           <span className="text-base leading-none">{icon}</span>
-          <span className="text-xs font-bold text-[#1B2A4A]">{title}</span>
+          <span className="text-xs font-bold text-[#000053]">{title}</span>
           {live && (
-            <span className="text-[9px] font-bold text-[#2E8B8B] bg-[#eaf5f5] px-1.5 py-0.5 rounded-full">
+            <span className="text-[9px] font-bold text-[#000053] bg-[#e8fff5] px-1.5 py-0.5 rounded-full">
               Live
             </span>
           )}
@@ -295,9 +295,9 @@ function PersonDetailPanel({
             ) : (
               <>
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <h3 className="font-bold text-[#1B2A4A] text-sm leading-tight">{name}</h3>
+                  <h3 className="font-bold text-[#000053] text-sm leading-tight">{name}</h3>
                   {isSelf && (
-                    <span className="text-[10px] font-bold text-[#2E8B8B] bg-[#eaf5f5] px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold text-[#000053] bg-[#e8fff5] px-2 py-0.5 rounded-full">
                       You
                     </span>
                   )}
@@ -350,7 +350,7 @@ function PersonDetailPanel({
                     <span className="text-sm shrink-0">{row.icon}</span>
                     <div className="min-w-0">
                       <p className="text-[10px] font-bold text-gray-400 uppercase leading-tight">{row.label}</p>
-                      <p className="text-xs font-medium text-[#1B2A4A] truncate capitalize">{row.value}</p>
+                      <p className="text-xs font-medium text-[#000053] truncate capitalize">{row.value}</p>
                     </div>
                   </div>
                 ))}
@@ -488,7 +488,7 @@ function ZoomPanCanvas({ children, onReset }: { children: React.ReactNode; onRes
           <button
             key={b.label}
             onClick={b.action}
-            className="w-8 h-8 bg-white border border-gray-200 rounded-lg shadow-sm text-sm font-bold text-gray-600 hover:bg-gray-50 hover:border-[#2E8B8B] hover:text-[#2E8B8B] transition-colors flex items-center justify-center"
+            className="w-8 h-8 bg-white border border-gray-200 rounded-lg shadow-sm text-sm font-bold text-gray-600 hover:bg-gray-50 hover:border-[#6cffc6] hover:text-[#000053] transition-colors flex items-center justify-center"
           >
             {b.label}
           </button>
@@ -567,8 +567,8 @@ function NodeCard({
         onClick={onNavigate}
         className={`rounded-full transition-all focus:outline-none ${
           isFocus
-            ? 'ring-[3px] ring-[#2E8B8B] ring-offset-2 shadow-md cursor-default'
-            : 'ring-2 ring-gray-200 hover:ring-[#2E8B8B] cursor-pointer shadow-sm'
+            ? 'ring-[3px] ring-[#6cffc6] ring-offset-2 shadow-md cursor-default'
+            : 'ring-2 ring-gray-200 hover:ring-[#6cffc6] cursor-pointer shadow-sm'
         }`}
       >
         <Avatar
@@ -583,8 +583,8 @@ function NodeCard({
           onClick={onDetail}
           className={`block w-full text-xs font-bold leading-tight text-center transition-colors ${
             isFocus
-              ? 'text-[#2E8B8B] cursor-pointer hover:text-[#257373]'
-              : 'text-[#1B2A4A] cursor-pointer hover:text-[#2E8B8B]'
+              ? 'text-[#000053] cursor-pointer hover:text-[#5ae8b0]'
+              : 'text-[#000053] cursor-pointer hover:text-[#000053]'
           }`}
           title="View profile"
         >
@@ -599,7 +599,7 @@ function NodeCard({
           </p>
         )}
         {isManager && (
-          <p className="text-[9px] text-[#2E8B8B] font-semibold mt-0.5">tap avatar ↑</p>
+          <p className="text-[9px] text-[#000053] font-semibold mt-0.5">tap avatar ↑</p>
         )}
         {!isFocus && !isManager && (
           <p className="text-[9px] text-gray-300 mt-0.5">tap name for profile</p>
@@ -612,8 +612,8 @@ function NodeCard({
           onClick={e => { e.stopPropagation(); onExpand(); }}
           className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold transition-all ${
             expanded
-              ? 'bg-[#2E8B8B] text-white border-[#2E8B8B]'
-              : 'bg-white text-[#2E8B8B] border-[#2E8B8B]/40 hover:bg-[#eaf5f5]'
+              ? 'bg-[#6cffc6] text-white border-[#6cffc6]'
+              : 'bg-white text-[#000053] border-[#6cffc6]/40 hover:bg-[#e8fff5]'
           }`}
         >
           {loading ? (
@@ -893,7 +893,7 @@ function PeopleChart({
         <div className="mt-10">
           <button
             onClick={() => navigateTo(viewerId)}
-            className="text-xs font-semibold text-[#2E8B8B] border border-[#2E8B8B]/30 px-3 py-1.5 rounded-full hover:bg-[#eaf5f5] transition-colors"
+            className="text-xs font-semibold text-[#000053] border border-[#6cffc6]/30 px-3 py-1.5 rounded-full hover:bg-[#e8fff5] transition-colors"
           >
             ← Return to my position
           </button>
@@ -963,18 +963,18 @@ function StructureChart({ initialRootId }: { initialRootId?: string | null }) {
       {history.length > 0 && (
         <button
           onClick={drillUp}
-          className="mb-6 self-start text-sm font-semibold text-[#2E8B8B] hover:underline flex items-center gap-1.5"
+          className="mb-6 self-start text-sm font-semibold text-[#000053] hover:underline flex items-center gap-1.5"
         >
           ← Up to {history.length === 1 ? 'Company' : 'previous'}
         </button>
       )}
 
       {/* Root node */}
-      <div className="bg-white border-t-4 border-[#1B2A4A] rounded-2xl px-6 py-5 text-center shadow-md min-w-[200px]">
+      <div className="bg-white border-t-4 border-[#000053] rounded-2xl px-6 py-5 text-center shadow-md min-w-[200px]">
         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
           {tree.type?.replace('_', ' ')}
         </p>
-        <p className="font-bold text-[#1B2A4A] text-lg">{tree.name}</p>
+        <p className="font-bold text-[#000053] text-lg">{tree.name}</p>
         <p className="text-xs font-mono text-gray-400 mt-1">{tree.code}</p>
       </div>
 
@@ -993,12 +993,12 @@ function StructureChart({ initialRootId }: { initialRootId?: string | null }) {
                 <button
                   type="button"
                   onClick={() => drillInto(child.id)}
-                  className="group text-left bg-white border border-gray-200 hover:border-[#2E8B8B] rounded-xl px-4 py-3 text-center shadow-sm min-w-[152px] transition-all focus:outline-none"
+                  className="group text-left bg-white border border-gray-200 hover:border-[#6cffc6] rounded-xl px-4 py-3 text-center shadow-sm min-w-[152px] transition-all focus:outline-none"
                 >
                   <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">
                     {child.type?.replace('_', ' ')}
                   </p>
-                  <p className="font-bold text-[#1B2A4A] text-sm group-hover:text-[#2E8B8B] transition-colors">
+                  <p className="font-bold text-[#000053] text-sm group-hover:text-[#000053] transition-colors">
                     {child.name}
                   </p>
                   <p className="text-[10px] font-mono text-gray-400 mt-0.5">{child.code}</p>
@@ -1062,7 +1062,7 @@ function SearchBox({ onNavigate }: { onNavigate: (id: string) => void }) {
         value={q}
         onChange={e => setQ(e.target.value)}
         onFocus={() => q.trim() && setOpen(true)}
-        className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-[#2E8B8B] focus:ring-1 focus:ring-[#2E8B8B] bg-white"
+        className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-[#6cffc6] focus:ring-1 focus:ring-[#6cffc6] bg-white"
       />
       <AnimatePresence>
         {open && (
@@ -1082,11 +1082,11 @@ function SearchBox({ onNavigate }: { onNavigate: (id: string) => void }) {
               <button
                 key={p.id}
                 onClick={() => select(p.id)}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-[#eaf5f5] text-left border-b border-gray-50 last:border-0 transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-[#e8fff5] text-left border-b border-gray-50 last:border-0 transition-colors"
               >
                 <Avatar name={`${p.first_name} ${p.last_name}`} size="xs" />
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold text-[#1B2A4A] truncate">
+                  <p className="text-xs font-semibold text-[#000053] truncate">
                     {p.first_name} {p.last_name}
                   </p>
                   <p className="text-[10px] text-gray-400 truncate">{p.job_title}</p>
@@ -1149,7 +1149,7 @@ export default function OrgPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-100 pb-5 mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-[#1B2A4A] tracking-tight">Organisation & People</h1>
+          <h1 className="text-3xl font-bold text-[#000053] tracking-tight">Organisation & People</h1>
           <p className="text-sm text-gray-400 mt-0.5">
             {view === 'people'
               ? 'Click avatar to navigate · Click name to view profile · Expand ▼ for reports'
@@ -1166,7 +1166,7 @@ export default function OrgPage() {
                 key={v}
                 onClick={() => handleToggleView(v)}
                 className={`px-3 py-1.5 text-xs font-bold capitalize transition-colors ${
-                  view === v ? 'bg-[#1B2A4A] text-white' : 'text-gray-500 hover:bg-gray-50'
+                  view === v ? 'bg-[#000053] text-white' : 'text-gray-500 hover:bg-gray-50'
                 }`}
               >
                 {v}

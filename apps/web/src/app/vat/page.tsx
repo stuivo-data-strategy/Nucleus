@@ -161,12 +161,12 @@ function ClassCard({ claim, userId, period, onClassified }: ClassCardProps) {
     >
       {/* Header */}
       <div className="flex items-start gap-3 p-4 pb-3">
-        <div className="w-9 h-9 rounded-full bg-[#1B2A4A] text-white text-sm font-bold flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-full bg-[#000053] text-white text-sm font-bold flex items-center justify-center shrink-0">
           {claim.claimant_initials}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-bold text-[#1B2A4A] text-sm">{claim.claimant_name}</span>
+            <span className="font-bold text-[#000053] text-sm">{claim.claimant_name}</span>
             <span className="text-xs font-mono text-gray-300">{claim.reference}</span>
             {claim.partial_claim && (
               <span className="text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-200 px-1.5 py-0.5 rounded-full">Partial</span>
@@ -180,7 +180,7 @@ function ClassCard({ claim, userId, period, onClassified }: ClassCardProps) {
           </p>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-xl font-bold font-mono text-[#1B2A4A]">{fmt(effectiveAmount)}</p>
+          <p className="text-xl font-bold font-mono text-[#000053]">{fmt(effectiveAmount)}</p>
           <p className="text-[10px] text-gray-400 font-mono">VAT: {fmt(vatAmt)}</p>
         </div>
       </div>
@@ -213,16 +213,16 @@ function ClassCard({ claim, userId, period, onClassified }: ClassCardProps) {
               onClick={() => setClassification(opt)}
               className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-colors ${
                 selected
-                  ? 'border-[#2E8B8B] bg-[#eaf5f5] ring-1 ring-[#2E8B8B]/30'
+                  ? 'border-[#6cffc6] bg-[#e8fff5] ring-1 ring-[#6cffc6]/30'
                   : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
               }`}
             >
               <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                selected ? 'border-[#2E8B8B]' : 'border-gray-300'
+                selected ? 'border-[#6cffc6]' : 'border-gray-300'
               }`}>
-                {selected && <div className="w-2 h-2 rounded-full bg-[#2E8B8B]" />}
+                {selected && <div className="w-2 h-2 rounded-full bg-[#6cffc6]" />}
               </div>
-              <span className={`text-xs font-semibold ${selected ? 'text-[#1B2A4A]' : 'text-gray-600'}`}>
+              <span className={`text-xs font-semibold ${selected ? 'text-[#000053]' : 'text-gray-600'}`}>
                 {meta.label}
               </span>
             </button>
@@ -250,7 +250,7 @@ function ClassCard({ claim, userId, period, onClassified }: ClassCardProps) {
                 min={0} max={100} step={5}
                 value={businessPortion}
                 onChange={e => setBusinessPortion(Number(e.target.value))}
-                className="w-full accent-[#2E8B8B]"
+                className="w-full accent-[#6cffc6]"
               />
               <p className="text-xs text-blue-600">
                 Reclaimable VAT: <span className="font-bold font-mono">{fmt(reclaimableVat(effectiveAmount, 'partially_reclaimable', businessPortion))}</span>
@@ -267,7 +267,7 @@ function ClassCard({ claim, userId, period, onClassified }: ClassCardProps) {
           placeholder="Supplier VAT No. (optional)"
           value={supplierVatNo}
           onChange={e => setSupplierVatNo(e.target.value)}
-          className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-[#1B2A4A] focus:outline-none focus:border-[#2E8B8B] placeholder:text-gray-300"
+          className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-[#000053] focus:outline-none focus:border-[#6cffc6] placeholder:text-gray-300"
         />
         <div className={`px-3 py-1.5 rounded-lg text-xs font-bold font-mono ${
           reclaimAmt > 0 ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-gray-50 text-gray-400 border border-gray-100'
@@ -282,7 +282,7 @@ function ClassCard({ claim, userId, period, onClassified }: ClassCardProps) {
           whileTap={{ scale: 0.97 }}
           onClick={handleSave}
           disabled={saving || done}
-          className="w-full py-2.5 rounded-xl text-sm font-bold bg-[#2E8B8B] text-white hover:bg-[#257373] disabled:opacity-50 transition-colors shadow-sm flex items-center justify-center gap-1.5"
+          className="w-full py-2.5 rounded-xl text-sm font-bold bg-[#6cffc6] text-white hover:bg-[#5ae8b0] disabled:opacity-50 transition-colors shadow-sm flex items-center justify-center gap-1.5"
         >
           {saving ? (
             <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -308,7 +308,7 @@ function VatSummaryTable({ rows, onExport, exporting }: {
     return (
       <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-12 text-center">
         <p className="text-4xl mb-3">📊</p>
-        <p className="font-bold text-[#1B2A4A]">No classified claims for this period</p>
+        <p className="font-bold text-[#000053]">No classified claims for this period</p>
         <p className="text-sm text-gray-500 mt-1">Classify claims in the queue to see the VAT summary</p>
       </div>
     );
@@ -326,7 +326,7 @@ function VatSummaryTable({ rows, onExport, exporting }: {
           whileTap={{ scale: 0.97 }}
           onClick={onExport}
           disabled={exporting}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#1B2A4A] text-white rounded-xl text-sm font-bold hover:bg-[#2a3d63] disabled:opacity-60 transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#000053] text-white rounded-xl text-sm font-bold hover:bg-[#2a3d63] disabled:opacity-60 transition-colors"
         >
           {exporting ? (
             <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -358,7 +358,7 @@ function VatSummaryTable({ rows, onExport, exporting }: {
                 .sort(([, a], [, b]) => (b as number) - (a as number))[0]?.[0] as VatClassification | undefined;
               return (
                 <tr key={i} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 font-medium text-[#1B2A4A]">
+                  <td className="px-4 py-3 font-medium text-[#000053]">
                     {cat.emoji} {cat.label}
                   </td>
                   <td className="px-3 py-3 text-center text-gray-500">{row.claim_count}</td>
@@ -378,12 +378,12 @@ function VatSummaryTable({ rows, onExport, exporting }: {
           </tbody>
           <tfoot className="bg-gray-50 border-t-2 border-gray-200">
             <tr>
-              <td className="px-4 py-3 font-bold text-[#1B2A4A]">Total</td>
-              <td className="px-3 py-3 text-center font-bold text-[#1B2A4A]">
+              <td className="px-4 py-3 font-bold text-[#000053]">Total</td>
+              <td className="px-3 py-3 text-center font-bold text-[#000053]">
                 {rows.reduce((s, r) => s + r.claim_count, 0)}
               </td>
-              <td className="px-3 py-3 text-right font-mono font-bold text-[#1B2A4A]">{fmt(totalGross)}</td>
-              <td className="px-3 py-3 text-right font-mono font-bold text-[#1B2A4A]">{fmt(totalVat)}</td>
+              <td className="px-3 py-3 text-right font-mono font-bold text-[#000053]">{fmt(totalGross)}</td>
+              <td className="px-3 py-3 text-right font-mono font-bold text-[#000053]">{fmt(totalVat)}</td>
               <td className="px-4 py-3 text-right font-mono font-bold text-green-700">{fmt(totalReclaimable)}</td>
               <td className="px-4 py-3" />
             </tr>
@@ -462,7 +462,7 @@ export default function VatPage() {
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center max-w-sm">
           <p className="text-5xl mb-4">🔒</p>
-          <p className="font-bold text-[#1B2A4A] text-lg">VAT Officer access required</p>
+          <p className="font-bold text-[#000053] text-lg">VAT Officer access required</p>
           <p className="text-gray-500 text-sm mt-2">Switch to Daniel Frost (Management Accountant) to access VAT recovery.</p>
         </div>
       </div>
@@ -476,7 +476,7 @@ export default function VatPage() {
         {/* ── Page header ──────────────────────────────────── */}
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-[#1B2A4A]">VAT Recovery</h1>
+            <h1 className="text-2xl font-bold text-[#000053]">VAT Recovery</h1>
             <p className="text-sm text-gray-500 mt-0.5">Classify expense claims and prepare VAT return data</p>
           </div>
 
@@ -494,7 +494,7 @@ export default function VatPage() {
             <select
               value={period}
               onChange={e => { setPeriod(e.target.value); setClassifiedCount(0); }}
-              className="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold text-[#1B2A4A] bg-white focus:outline-none focus:border-[#2E8B8B] shadow-sm"
+              className="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold text-[#000053] bg-white focus:outline-none focus:border-[#6cffc6] shadow-sm"
             >
               {periodOptions().map(p => (
                 <option key={p} value={p}>{p}</option>
@@ -516,13 +516,13 @@ export default function VatPage() {
               label="Pending Classification"
               value={stats?.pending_classification ?? queue.length}
               sub="awaiting review"
-              color="bg-white border-gray-200 text-[#1B2A4A]"
+              color="bg-white border-gray-200 text-[#000053]"
             />
             <StatCard
               label="Classified"
               value={stats?.classified ?? 0}
               sub={`for ${period}`}
-              color="bg-[#eaf5f5] border-[#2E8B8B]/20 text-[#2E8B8B]"
+              color="bg-[#e8fff5] border-[#6cffc6]/20 text-[#000053]"
             />
             <StatCard
               label="Total Reclaimable"
@@ -534,7 +534,7 @@ export default function VatPage() {
               label="Recovery Rate"
               value={stats?.recovery_rate != null ? `${stats.recovery_rate}%` : '—'}
               sub="of total VAT"
-              color="bg-white border-gray-200 text-[#1B2A4A]"
+              color="bg-white border-gray-200 text-[#000053]"
             />
           </div>
         )}
@@ -547,7 +547,7 @@ export default function VatPage() {
               onClick={() => setTab(t)}
               className={`px-5 py-2 rounded-lg text-sm font-bold transition-colors ${
                 tab === t
-                  ? 'bg-white text-[#1B2A4A] shadow-sm'
+                  ? 'bg-white text-[#000053] shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -576,11 +576,11 @@ export default function VatPage() {
               ) : queue.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-12 text-center">
                   <p className="text-4xl mb-3">✅</p>
-                  <p className="font-bold text-[#1B2A4A]">Queue is clear</p>
+                  <p className="font-bold text-[#000053]">Queue is clear</p>
                   <p className="text-sm text-gray-500 mt-1">All cleared claims have been classified for {period}</p>
                   <button
                     onClick={() => setTab('summary')}
-                    className="mt-4 px-4 py-2 bg-[#2E8B8B] text-white rounded-xl text-sm font-bold hover:bg-[#257373] transition-colors"
+                    className="mt-4 px-4 py-2 bg-[#6cffc6] text-white rounded-xl text-sm font-bold hover:bg-[#5ae8b0] transition-colors"
                   >
                     View VAT Summary →
                   </button>

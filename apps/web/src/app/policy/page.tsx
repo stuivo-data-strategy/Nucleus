@@ -161,7 +161,7 @@ function EditableCell({
           if (e.key === 'Enter')  save();
           if (e.key === 'Escape') { setEditing(false); setLocalVal(value != null ? value.toFixed(2) : ''); }
         }}
-        className="w-24 text-right font-mono text-sm px-2 py-1.5 border-2 border-[#2E8B8B] rounded-lg outline-none bg-[#eaf5f5] text-[#1B2A4A] focus:ring-0"
+        className="w-24 text-right font-mono text-sm px-2 py-1.5 border-2 border-[#6cffc6] rounded-lg outline-none bg-[#e8fff5] text-[#000053] focus:ring-0"
         autoFocus
       />
     );
@@ -186,7 +186,7 @@ function EditableCell({
           : flash === 'saving'
           ? 'border-gray-200 text-gray-400 animate-pulse'
           : value != null
-          ? 'border-dashed border-gray-300 hover:border-[#2E8B8B]/60 hover:bg-[#eaf5f5]/60 text-[#1B2A4A] cursor-text'
+          ? 'border-dashed border-gray-300 hover:border-[#6cffc6]/60 hover:bg-[#e8fff5]/60 text-[#000053] cursor-text'
           : 'border-dashed border-gray-200 text-gray-300 hover:border-gray-300 cursor-text'
       }`}
     >
@@ -248,7 +248,7 @@ function PolicyTable({
                 <td className="py-3.5 px-4">
                   <div className="flex items-center gap-2.5">
                     <span className="text-lg leading-none">{cat.emoji}</span>
-                    <span className="font-semibold text-[#1B2A4A]">{cat.label}</span>
+                    <span className="font-semibold text-[#000053]">{cat.label}</span>
                     {rule.description && (
                       <span className="text-xs text-gray-400 hidden group-hover:inline">{rule.description}</span>
                     )}
@@ -303,20 +303,20 @@ function ApprovalChainDiagram({ thresholds }: { thresholds: any }) {
     },
     {
       range:    `£25 – £${ccAbove - 1}`,
-      steps:    [{ label: 'Line Manager', icon: '①', cls: 'bg-[#2E8B8B]/10 text-[#2E8B8B] border-[#2E8B8B]/30' }],
+      steps:    [{ label: 'Line Manager', icon: '①', cls: 'bg-[#6cffc6]/10 text-[#000053] border-[#6cffc6]/30' }],
     },
     {
       range:    `£${ccAbove} – £${financeAbove - 1}`,
       steps:    [
-        { label: 'Line Manager',      icon: '①', cls: 'bg-[#2E8B8B]/10 text-[#2E8B8B] border-[#2E8B8B]/30' },
-        { label: 'Cost Centre Owner', icon: '②', cls: 'bg-[#1B2A4A]/10 text-[#1B2A4A] border-[#1B2A4A]/20' },
+        { label: 'Line Manager',      icon: '①', cls: 'bg-[#6cffc6]/10 text-[#000053] border-[#6cffc6]/30' },
+        { label: 'Cost Centre Owner', icon: '②', cls: 'bg-[#000053]/10 text-[#000053] border-[#000053]/20' },
       ],
     },
     {
       range:    `£${financeAbove}+`,
       steps:    [
-        { label: 'Line Manager',      icon: '①', cls: 'bg-[#2E8B8B]/10 text-[#2E8B8B] border-[#2E8B8B]/30' },
-        { label: 'Cost Centre Owner', icon: '②', cls: 'bg-[#1B2A4A]/10 text-[#1B2A4A] border-[#1B2A4A]/20' },
+        { label: 'Line Manager',      icon: '①', cls: 'bg-[#6cffc6]/10 text-[#000053] border-[#6cffc6]/30' },
+        { label: 'Cost Centre Owner', icon: '②', cls: 'bg-[#000053]/10 text-[#000053] border-[#000053]/20' },
         { label: 'Finance',           icon: '③', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
       ],
     },
@@ -336,7 +336,7 @@ function ApprovalChainDiagram({ thresholds }: { thresholds: any }) {
           >
             {/* Amount range */}
             <div className="w-36 shrink-0 text-right">
-              <span className={`text-xs font-mono font-bold ${tier.dimmed ? 'text-gray-400' : 'text-[#1B2A4A]'}`}>
+              <span className={`text-xs font-mono font-bold ${tier.dimmed ? 'text-gray-400' : 'text-[#000053]'}`}>
                 {tier.range}
               </span>
             </div>
@@ -371,10 +371,10 @@ function ApprovalChainDiagram({ thresholds }: { thresholds: any }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
-        className="bg-[#1B2A4A]/3 border border-[#1B2A4A]/10 rounded-xl p-4 mt-2"
+        className="bg-[#000053]/3 border border-[#000053]/10 rounded-xl p-4 mt-2"
       >
-        <p className="text-sm text-[#1B2A4A]/80 leading-relaxed">
-          <span className="font-bold text-[#1B2A4A]">Graph-based routing</span> — Approvers are resolved from the organisation hierarchy at submission time, not configured here.
+        <p className="text-sm text-[#000053]/80 leading-relaxed">
+          <span className="font-bold text-[#000053]">Graph-based routing</span> — Approvers are resolved from the organisation hierarchy at submission time, not configured here.
           When an employee's reporting line or cost centre changes, routing updates automatically.
           The resolution path (e.g. <span className="font-mono text-xs bg-white/60 px-1 py-0.5 rounded">Sarah Chen →[reports_to]→ Alex Drummond</span>) is recorded on every workflow instance for full auditability.
         </p>
@@ -413,7 +413,7 @@ function AuditLog({ entries }: { entries: any[] }) {
               ⚙️
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-[#1B2A4A] leading-snug">{description}</p>
+              <p className="text-sm text-[#000053] leading-snug">{description}</p>
               <p className="text-xs text-gray-400 mt-0.5">
                 By <span className="font-medium text-gray-500">{person}</span>
                 <span className="mx-1.5 text-gray-200">·</span>
@@ -432,17 +432,17 @@ function AuditLog({ entries }: { entries: any[] }) {
 function DemoTip() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="bg-[#eaf5f5] border border-[#2E8B8B]/30 rounded-xl overflow-hidden">
+    <div className="bg-[#e8fff5] border border-[#6cffc6]/30 rounded-xl overflow-hidden">
       <button
         onClick={() => setOpen(v => !v)}
         className="w-full flex items-center justify-between px-5 py-3.5 text-left"
       >
         <div className="flex items-center gap-2">
           <span className="text-lg">🎯</span>
-          <span className="text-sm font-bold text-[#2E8B8B]">Demo Script — "Change a Rule, See It Enforced"</span>
+          <span className="text-sm font-bold text-[#000053]">Demo Script — "Change a Rule, See It Enforced"</span>
         </div>
         <svg
-          className={`w-4 h-4 text-[#2E8B8B] transition-transform ${open ? 'rotate-90' : ''}`}
+          className={`w-4 h-4 text-[#000053] transition-transform ${open ? 'rotate-90' : ''}`}
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -457,7 +457,7 @@ function DemoTip() {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <ol className="px-5 pb-4 space-y-2 text-sm text-[#1B2A4A]/80">
+            <ol className="px-5 pb-4 space-y-2 text-sm text-[#000053]/80">
               {[
                 'Note that the Meals spending limit is £75.00.',
                 'Go to Expenses → New Claim → select Meals → type £80 → see red "Exceeds limit" and submit disabled.',
@@ -466,7 +466,7 @@ function DemoTip() {
                 'Change it back to £75 → the £80 claim is blocked again. Policy is live data.',
               ].map((step, i) => (
                 <li key={i} className="flex gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-[#2E8B8B] text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="w-5 h-5 rounded-full bg-[#6cffc6] text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                     {i + 1}
                   </span>
                   {step}
@@ -550,7 +550,7 @@ export default function PolicyPage() {
       {/* ── Header ────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 border-b border-gray-100 pb-6">
         <div>
-          <h1 className="text-3xl font-bold text-[#1B2A4A] tracking-tight">Policy Administration</h1>
+          <h1 className="text-3xl font-bold text-[#000053] tracking-tight">Policy Administration</h1>
           <p className="text-gray-500 mt-1.5 text-sm max-w-xl">
             Spending limits and receipt rules are live data in SurrealDB. Changes take effect immediately —
             no deploy, no restart. The policy engine reads these values on every claim validation.
@@ -575,7 +575,7 @@ export default function PolicyPage() {
       ) : error ? (
         <Card className="p-8 text-center border-gray-200">
           <p className="text-red-500 font-medium">{error}</p>
-          <button onClick={fetchAll} className="mt-3 text-sm font-semibold text-[#2E8B8B] hover:underline">
+          <button onClick={fetchAll} className="mt-3 text-sm font-semibold text-[#000053] hover:underline">
             Retry
           </button>
         </Card>
@@ -583,7 +583,7 @@ export default function PolicyPage() {
         <Card className="border-gray-200 shadow-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/60 flex items-center justify-between">
             <div>
-              <p className="text-sm font-bold text-[#1B2A4A]">Spending Limits & Receipt Rules</p>
+              <p className="text-sm font-bold text-[#000053]">Spending Limits & Receipt Rules</p>
               <p className="text-xs text-gray-400 mt-0.5">
                 Click any dashed value to edit — changes are written to SurrealDB instantly
               </p>
@@ -602,7 +602,7 @@ export default function PolicyPage() {
       {/* ── Approval chain diagram ─────────────────────────────────────── */}
       <Card className="border-gray-200 shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/60">
-          <p className="text-sm font-bold text-[#1B2A4A]">Approval Routing — Amount Thresholds</p>
+          <p className="text-sm font-bold text-[#000053]">Approval Routing — Amount Thresholds</p>
           <p className="text-xs text-gray-400 mt-0.5">
             Claim amount determines how many approvers are required
           </p>
@@ -617,7 +617,7 @@ export default function PolicyPage() {
         <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/60 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2.5">
-              <p className="text-sm font-bold text-[#1B2A4A]">Delegated Approval Routing</p>
+              <p className="text-sm font-bold text-[#000053]">Delegated Approval Routing</p>
               <span className="text-[10px] font-bold text-gray-400 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full">
                 Future development
               </span>
@@ -658,7 +658,7 @@ export default function PolicyPage() {
         <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/60 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2.5">
-              <p className="text-sm font-bold text-[#1B2A4A]">SLA-based Escalation Routing</p>
+              <p className="text-sm font-bold text-[#000053]">SLA-based Escalation Routing</p>
               <span className="text-[10px] font-bold text-gray-400 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full">
                 Future development
               </span>
@@ -698,7 +698,7 @@ export default function PolicyPage() {
       <Card className="border-gray-200 shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/60 flex items-center justify-between">
           <div>
-            <p className="text-sm font-bold text-[#1B2A4A]">Recent Policy Changes</p>
+            <p className="text-sm font-bold text-[#000053]">Recent Policy Changes</p>
             <p className="text-xs text-gray-400 mt-0.5">
               Every rule change is written to the audit log with before/after values
             </p>

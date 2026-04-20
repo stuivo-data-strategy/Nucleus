@@ -110,7 +110,7 @@ function WorkflowStep({ step, index }: { step: any; index: number }) {
     approved: { label: 'Approved',     icon: '✓', color: 'text-green-700',  bg: 'bg-green-500 text-white' },
     rejected: { label: 'Rejected',     icon: '✗', color: 'text-red-700',    bg: 'bg-red-500 text-white' },
     queried:  { label: 'Query sent',   icon: '?', color: 'text-purple-700', bg: 'bg-purple-500 text-white' },
-    pending:  { label: 'Pending review',icon: '…', color: 'text-amber-700',  bg: 'bg-[#2E8B8B] text-white' },
+    pending:  { label: 'Pending review',icon: '…', color: 'text-amber-700',  bg: 'bg-[#6cffc6] text-white' },
     waiting:  { label: 'Waiting',      icon: '…', color: 'text-gray-400',   bg: 'bg-gray-200 text-gray-400' },
   };
 
@@ -135,9 +135,9 @@ function WorkflowStep({ step, index }: { step: any; index: number }) {
       {/* Step detail */}
       <div className="pb-5 min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-sm font-bold text-[#1B2A4A] leading-tight">{step.approver_name}</p>
+          <p className="text-sm font-bold text-[#000053] leading-tight">{step.approver_name}</p>
           {step.role_label && (
-            <span className="text-[10px] font-bold bg-[#2E8B8B]/10 text-[#2E8B8B] px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold bg-[#6cffc6]/10 text-[#000053] px-2 py-0.5 rounded-full">
               {step.role_label}
             </span>
           )}
@@ -368,7 +368,7 @@ export default function ClaimDetailModal({ claimId, userId, onClose, onActionCom
           <div className="flex items-center gap-3">
             <span className="text-2xl">{cat.emoji}</span>
             <div>
-              <p className="font-bold text-[#1B2A4A] text-sm leading-tight">
+              <p className="font-bold text-[#000053] text-sm leading-tight">
                 {claim?.description ?? cat.label ?? 'Expense Claim'}
               </p>
               {claim?.reference && (
@@ -397,7 +397,7 @@ export default function ClaimDetailModal({ claimId, userId, onClose, onActionCom
           ) : error ? (
             <div className="p-8 text-center">
               <p className="text-red-500 font-medium">{error}</p>
-              <button onClick={fetchDetail} className="mt-3 text-sm font-semibold text-[#2E8B8B] hover:underline">
+              <button onClick={fetchDetail} className="mt-3 text-sm font-semibold text-[#000053] hover:underline">
                 Retry
               </button>
             </div>
@@ -407,7 +407,7 @@ export default function ClaimDetailModal({ claimId, userId, onClose, onActionCom
               {/* ── 1. Claim header ─────────────────────────────────── */}
               <div className="flex items-start justify-between gap-4 pb-4 border-b border-gray-100">
                 <div>
-                  <p className="text-3xl font-bold text-[#1B2A4A] font-mono">
+                  <p className="text-3xl font-bold text-[#000053] font-mono">
                     £{(claim?.amount ?? 0).toFixed(2)}
                   </p>
                   <div className="flex flex-wrap items-center gap-2 mt-2">
@@ -424,7 +424,7 @@ export default function ClaimDetailModal({ claimId, userId, onClose, onActionCom
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-xs text-gray-400 font-medium">Submitted by</p>
-                  <p className="text-sm font-bold text-[#1B2A4A]">{claim?.claimant_name ?? '—'}</p>
+                  <p className="text-sm font-bold text-[#000053]">{claim?.claimant_name ?? '—'}</p>
                   {claim?.claimant_job_title && (
                     <p className="text-xs text-gray-400">{claim.claimant_job_title}</p>
                   )}
@@ -496,7 +496,7 @@ export default function ClaimDetailModal({ claimId, userId, onClose, onActionCom
                     {/* Expand toggle */}
                     <button
                       onClick={() => setPolicyExpanded(v => !v)}
-                      className="flex items-center gap-1.5 text-xs font-semibold text-[#2E8B8B] hover:text-[#257373] transition-colors"
+                      className="flex items-center gap-1.5 text-xs font-semibold text-[#000053] hover:text-[#5ae8b0] transition-colors"
                     >
                       <svg
                         className={`w-3.5 h-3.5 transition-transform ${policyExpanded ? 'rotate-90' : ''}`}
@@ -578,7 +578,7 @@ export default function ClaimDetailModal({ claimId, userId, onClose, onActionCom
                 <Section title="How Were Approvers Determined?">
                   <button
                     onClick={() => setResolutionExpanded(v => !v)}
-                    className="flex items-center gap-1.5 text-xs font-semibold text-[#2E8B8B] hover:text-[#257373] transition-colors"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-[#000053] hover:text-[#5ae8b0] transition-colors"
                   >
                     <svg
                       className={`w-3.5 h-3.5 transition-transform ${resolutionExpanded ? 'rotate-90' : ''}`}
@@ -598,7 +598,7 @@ export default function ClaimDetailModal({ claimId, userId, onClose, onActionCom
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                       >
-                        <div className="mt-3 bg-[#1B2A4A]/3 rounded-xl p-4 space-y-1 font-mono text-[11px]">
+                        <div className="mt-3 bg-[#000053]/3 rounded-xl p-4 space-y-1 font-mono text-[11px]">
                           {resolutionLog.map((line, i) =>
                             line === '---' ? (
                               <div key={i} className="border-t border-gray-200 my-2" />
@@ -607,9 +607,9 @@ export default function ClaimDetailModal({ claimId, userId, onClose, onActionCom
                                 key={i}
                                 className={
                                   line.startsWith('  ')
-                                    ? 'text-[#2E8B8B] pl-3'
+                                    ? 'text-[#000053] pl-3'
                                     : line.startsWith('Final')
-                                    ? 'font-bold text-[#1B2A4A] mt-1'
+                                    ? 'font-bold text-[#000053] mt-1'
                                     : 'text-gray-600'
                                 }
                               >
@@ -650,7 +650,7 @@ export default function ClaimDetailModal({ claimId, userId, onClose, onActionCom
 
                         {/* Content */}
                         <div className="pt-1 min-w-0 flex-1">
-                          <p className="text-sm font-medium text-[#1B2A4A] leading-snug">{entry.title}</p>
+                          <p className="text-sm font-medium text-[#000053] leading-snug">{entry.title}</p>
                           {entry.note && (
                             <p className="text-xs text-gray-500 mt-1 italic">"{entry.note}"</p>
                           )}

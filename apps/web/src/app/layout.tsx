@@ -4,7 +4,7 @@ import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
 
 export const metadata = {
-  title: 'Nucleus — Expenses',
+  title: 'Nucleus',
   description: 'Policy-driven expense management with graph-based approvals',
 };
 

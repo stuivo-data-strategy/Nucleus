@@ -81,7 +81,7 @@ export function ClaimTypeSelector({ onSelect, onCancel }: ClaimTypeSelectorProps
   return (
     <div className="flex flex-col h-full overflow-hidden p-6 gap-6 min-h-[420px]">
       <div className="text-center">
-        <h3 className="font-bold text-[#1B2A4A] text-xl">What are you claiming?</h3>
+        <h3 className="font-bold text-[#000053] text-xl">What are you claiming?</h3>
         <p className="text-sm text-gray-500 mt-1">Select the type of expense to get started</p>
       </div>
 
@@ -103,16 +103,16 @@ export function ClaimTypeSelector({ onSelect, onCancel }: ClaimTypeSelectorProps
               className={`
                 relative p-4 rounded-xl cursor-pointer border-2 transition-all flex flex-col justify-center items-center text-center gap-3
                 ${isSelected 
-                  ? 'border-[#2E8B8B] bg-[#2E8B8B]/5 shadow-sm shadow-[#2E8B8B]/10' 
-                  : 'border-gray-200 bg-white hover:border-[#2E8B8B]/50 hover:bg-gray-50'
+                  ? 'border-[#6cffc6] bg-[#6cffc6]/5 shadow-sm shadow-[#6cffc6]/10' 
+                  : 'border-gray-200 bg-white hover:border-[#6cffc6]/50 hover:bg-gray-50'
                 }
               `}
             >
-              <div className={`p-3 rounded-full transition-colors ${isSelected ? 'bg-[#2E8B8B] text-white' : 'bg-[#eaf5f5] text-[#2E8B8B]'}`}>
+              <div className={`p-3 rounded-full transition-colors ${isSelected ? 'bg-[#6cffc6] text-white' : 'bg-[#e8fff5] text-[#000053]'}`}>
                 {type.icon}
               </div>
               <div>
-                <p className={`font-bold text-base transition-colors ${isSelected ? 'text-[#1B2A4A]' : 'text-gray-700'}`}>
+                <p className={`font-bold text-base transition-colors ${isSelected ? 'text-[#000053]' : 'text-gray-700'}`}>
                   {type.label}
                 </p>
                 <p className="text-xs text-gray-500 mt-1 leading-relaxed">
@@ -124,7 +124,7 @@ export function ClaimTypeSelector({ onSelect, onCancel }: ClaimTypeSelectorProps
               {isSelected && (
                 <motion.div
                   layoutId="selected-ring"
-                  className="absolute inset-[-2px] border-2 border-[#2E8B8B] rounded-xl pointer-events-none"
+                  className="absolute inset-[-2px] border-2 border-[#6cffc6] rounded-xl pointer-events-none"
                   initial={false}
                   transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                 />
@@ -142,7 +142,7 @@ export function ClaimTypeSelector({ onSelect, onCancel }: ClaimTypeSelectorProps
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               onClick={() => onSelect(selectedType)}
-              className="absolute inset-0 w-full h-12 rounded-xl text-base font-bold bg-[#2E8B8B] text-white hover:bg-[#257373] shadow-md shadow-[#2E8B8B]/20 transition-all flex items-center justify-center gap-2"
+              className="absolute inset-0 w-full h-12 rounded-xl text-base font-bold bg-[#6cffc6] text-white hover:bg-[#5ae8b0] shadow-md shadow-[#6cffc6]/20 transition-all flex items-center justify-center gap-2"
             >
               Continue
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

@@ -105,7 +105,7 @@ function FlagForm({ onSubmit, onCancel }: {
         <select
           value={reason}
           onChange={e => setReason(e.target.value)}
-          className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm text-[#1B2A4A] bg-white focus:outline-none focus:border-amber-500"
+          className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm text-[#000053] bg-white focus:outline-none focus:border-amber-500"
         >
           <option value="">Select reason…</option>
           {FLAG_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
@@ -115,7 +115,7 @@ function FlagForm({ onSubmit, onCancel }: {
           onChange={e => setNotes(e.target.value)}
           placeholder="Additional notes (optional)…"
           rows={2}
-          className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm text-[#1B2A4A] bg-white focus:outline-none focus:border-amber-500 resize-none placeholder:text-amber-400"
+          className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm text-[#000053] bg-white focus:outline-none focus:border-amber-500 resize-none placeholder:text-amber-400"
         />
         <div className="flex gap-2">
           <button
@@ -211,8 +211,8 @@ function AuditCard({
       exit={{ opacity: 0, height: 0, marginBottom: 0 }}
       transition={{ duration: 0.25 }}
       tabIndex={0}
-      className={`rounded-2xl border bg-white shadow-sm transition-colors outline-none focus:ring-2 focus:ring-[#2E8B8B]/40 ${
-        selected ? 'border-[#2E8B8B] ring-1 ring-[#2E8B8B]/30' : 'border-gray-200'
+      className={`rounded-2xl border bg-white shadow-sm transition-colors outline-none focus:ring-2 focus:ring-[#6cffc6]/40 ${
+        selected ? 'border-[#6cffc6] ring-1 ring-[#6cffc6]/30' : 'border-gray-200'
       } ${isFlaggedSection ? 'border-amber-200 bg-amber-50/30' : ''}`}
     >
       {/* ── Header row ─────────────────────────────────────── */}
@@ -222,7 +222,7 @@ function AuditCard({
           <button
             onClick={() => onToggleSelect(claim.id)}
             className={`mt-0.5 w-5 h-5 rounded border-2 shrink-0 flex items-center justify-center transition-colors ${
-              selected ? 'bg-[#2E8B8B] border-[#2E8B8B]' : 'border-gray-300 hover:border-[#2E8B8B]'
+              selected ? 'bg-[#6cffc6] border-[#6cffc6]' : 'border-gray-300 hover:border-[#6cffc6]'
             }`}
           >
             {selected && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
@@ -230,14 +230,14 @@ function AuditCard({
         )}
 
         {/* Avatar */}
-        <div className="w-9 h-9 rounded-full bg-[#1B2A4A] text-white text-sm font-bold flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-full bg-[#000053] text-white text-sm font-bold flex items-center justify-center shrink-0">
           {claim.claimant_initials}
         </div>
 
         {/* Identity */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-bold text-[#1B2A4A] text-sm">{claim.claimant_name}</span>
+            <span className="font-bold text-[#000053] text-sm">{claim.claimant_name}</span>
             <span className="text-xs text-gray-400">{claim.claimant_job_title}</span>
             <span className="text-xs font-mono text-gray-300">{claim.reference}</span>
             {claim.exception_requested && (
@@ -254,7 +254,7 @@ function AuditCard({
 
         {/* Amount */}
         <div className="text-right shrink-0">
-          <p className="text-xl font-bold font-mono text-[#1B2A4A]">{fmt(claimAmt)}</p>
+          <p className="text-xl font-bold font-mono text-[#000053]">{fmt(claimAmt)}</p>
           <p className="text-[10px] text-gray-400 font-mono">VAT: {fmt(vat(claimAmt))}</p>
         </div>
       </div>
@@ -264,7 +264,7 @@ function AuditCard({
         {/* Receipt */}
         <div className="bg-gray-50 rounded-xl p-2.5">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Receipt</p>
-          <p className="text-base font-bold font-mono text-[#1B2A4A]">{fmt(receiptAmt)}</p>
+          <p className="text-base font-bold font-mono text-[#000053]">{fmt(receiptAmt)}</p>
           {claim.partial_claim && receiptAmt !== claimAmt && (
             <p className="text-[10px] text-gray-400 mt-0.5">Full receipt</p>
           )}
@@ -273,7 +273,7 @@ function AuditCard({
         {/* Claimed */}
         <div className={`rounded-xl p-2.5 ${claim.partial_claim && receiptAmt !== claimAmt ? 'bg-amber-50 border border-amber-100' : 'bg-gray-50'}`}>
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Claimed</p>
-          <p className="text-base font-bold font-mono text-[#1B2A4A]">{fmt(claimAmt)}</p>
+          <p className="text-base font-bold font-mono text-[#000053]">{fmt(claimAmt)}</p>
           {claim.partial_claim && receiptAmt !== claimAmt && (
             <p className="text-[10px] text-amber-600 mt-0.5">
               Δ {fmt(receiptAmt - claimAmt)}
@@ -392,7 +392,7 @@ function AuditCard({
             whileTap={{ scale: 0.97 }}
             onClick={handleResolve}
             disabled={actionState !== 'idle'}
-            className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-[#2E8B8B] text-white hover:bg-[#257373] disabled:opacity-50 transition-colors shadow-sm flex items-center justify-center gap-1.5"
+            className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-[#6cffc6] text-white hover:bg-[#5ae8b0] disabled:opacity-50 transition-colors shadow-sm flex items-center justify-center gap-1.5"
           >
             {actionState === 'resolving' ? (
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -509,7 +509,7 @@ export default function AuditPage() {
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center max-w-sm">
           <p className="text-5xl mb-4">🔒</p>
-          <p className="font-bold text-[#1B2A4A] text-lg">Audit access required</p>
+          <p className="font-bold text-[#000053] text-lg">Audit access required</p>
           <p className="text-gray-500 text-sm mt-2">Switch to Lisa Thornton (Expenses Officer) to access the audit queue.</p>
         </div>
       </div>
@@ -523,7 +523,7 @@ export default function AuditPage() {
         {/* ── Page header ──────────────────────────────────── */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-[#1B2A4A]">Expense Audit</h1>
+            <h1 className="text-2xl font-bold text-[#000053]">Expense Audit</h1>
             <p className="text-sm text-gray-500 mt-0.5">Review approved claims before payment processing</p>
           </div>
           {(clearedCount > 0) && (
@@ -551,13 +551,13 @@ export default function AuditPage() {
               label="Ready for Audit"
               value={stats?.ready_for_audit ?? queue.length}
               sub="pending review"
-              color="bg-white border-gray-200 text-[#1B2A4A]"
+              color="bg-white border-gray-200 text-[#000053]"
             />
             <StatCard
               label="Flagged for Review"
               value={stats?.flagged ?? flagged.length}
               sub="need attention"
-              color={flagged.length > 0 ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-gray-200 text-[#1B2A4A]'}
+              color={flagged.length > 0 ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-white border-gray-200 text-[#000053]'}
             />
             <StatCard
               label="Cleared Today"
@@ -569,7 +569,7 @@ export default function AuditPage() {
               label="Avg Processing"
               value={stats?.avg_processing_hours != null ? `${stats.avg_processing_hours}h` : '—'}
               sub="approval to clearance"
-              color="bg-white border-gray-200 text-[#1B2A4A]"
+              color="bg-white border-gray-200 text-[#000053]"
             />
           </div>
         )}
@@ -578,9 +578,9 @@ export default function AuditPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h2 className="text-base font-bold text-[#1B2A4A]">Audit Queue</h2>
+              <h2 className="text-base font-bold text-[#000053]">Audit Queue</h2>
               {queue.length > 0 && (
-                <span className="text-xs font-bold bg-[#1B2A4A] text-white px-2 py-0.5 rounded-full">
+                <span className="text-xs font-bold bg-[#000053] text-white px-2 py-0.5 rounded-full">
                   {queue.length}
                 </span>
               )}
@@ -590,7 +590,7 @@ export default function AuditPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={toggleSelectAll}
-                  className="text-xs font-semibold text-[#2E8B8B] hover:text-[#257373] transition-colors"
+                  className="text-xs font-semibold text-[#000053] hover:text-[#5ae8b0] transition-colors"
                 >
                   {selected.size === queue.length ? 'Deselect all' : 'Select all'}
                 </button>
@@ -626,7 +626,7 @@ export default function AuditPage() {
           ) : queue.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-12 text-center">
               <p className="text-4xl mb-3">✅</p>
-              <p className="font-bold text-[#1B2A4A]">Queue is clear</p>
+              <p className="font-bold text-[#000053]">Queue is clear</p>
               <p className="text-sm text-gray-500 mt-1">All approved claims have been processed</p>
             </div>
           ) : (

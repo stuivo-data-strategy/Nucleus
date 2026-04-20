@@ -67,7 +67,7 @@ function ClaimsTable({ claims, isPosted = false }: { claims: any[]; isPosted?: b
               initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
               className={`hover:bg-gray-50 transition-colors ${isPosted ? 'opacity-60' : ''}`}>
               <td className="px-4 py-3 font-mono text-xs font-semibold text-gray-500 whitespace-nowrap">{claim.reference}</td>
-              <td className="px-4 py-3 font-medium text-[#1B2A4A] whitespace-nowrap">{claim.employee_name}</td>
+              <td className="px-4 py-3 font-medium text-[#000053] whitespace-nowrap">{claim.employee_name}</td>
               <td className="px-4 py-3 text-gray-600 max-w-[200px] truncate">{claim.description || '—'}</td>
               <td className="px-4 py-3">
                 <span className="px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-700">
@@ -79,7 +79,7 @@ function ClaimsTable({ claims, isPosted = false }: { claims: any[]; isPosted?: b
                 {fmtGBP(claim.vat_amount)}
                 <span className="text-xs ml-1 text-gray-300">({claim.vat_rate}%)</span>
               </td>
-              <td className="px-4 py-3 font-mono text-sm font-semibold text-right text-[#1B2A4A] whitespace-nowrap">{fmtGBP(claim.amount_gross)}</td>
+              <td className="px-4 py-3 font-mono text-sm font-semibold text-right text-[#000053] whitespace-nowrap">{fmtGBP(claim.amount_gross)}</td>
               <td className="px-4 py-3 font-mono text-xs font-semibold text-teal whitespace-nowrap">
                 {claim.gl_code || <span className="text-gray-300">—</span>}
               </td>
@@ -186,7 +186,7 @@ export default function FinancePage() {
   if (!isFinance) return (
     <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="max-w-lg mx-auto mt-24 text-center">
       <div className="text-5xl mb-4">🔒</div>
-      <h1 className="text-2xl font-bold text-[#1B2A4A] mb-2">Access Denied</h1>
+      <h1 className="text-2xl font-bold text-[#000053] mb-2">Access Denied</h1>
       <p className="text-gray-500">Finance Export is only available to users with the <strong>Finance Approver</strong> role.</p>
       <p className="text-sm text-gray-400 mt-2">Switch to Robert Shaw to access this view.</p>
     </motion.div>
@@ -196,7 +196,7 @@ export default function FinancePage() {
   if (error === 'connection') return (
     <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="max-w-lg mx-auto mt-24 text-center">
       <div className="text-5xl mb-4">⚠️</div>
-      <h1 className="text-2xl font-bold text-[#1B2A4A] mb-2">Cannot reach API</h1>
+      <h1 className="text-2xl font-bold text-[#000053] mb-2">Cannot reach API</h1>
       <p className="text-gray-500 mb-4">Make sure the API server is running on <code className="font-mono text-sm bg-gray-100 px-1 rounded">localhost:3001</code></p>
       <Button onClick={loadData}>Retry</Button>
     </motion.div>
@@ -209,7 +209,7 @@ export default function FinancePage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#1B2A4A] tracking-tight">Finance Export</h1>
+          <h1 className="text-3xl font-bold text-[#000053] tracking-tight">Finance Export</h1>
           <p className="text-gray-500 mt-1">Review approved claims, export to CSV, and mark as posted.</p>
         </div>
         <div className="flex gap-3 flex-wrap">
@@ -230,12 +230,12 @@ export default function FinancePage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: 'Ready to Export', value: approved.length, sub: fmtGBP(totalPending), color: 'border-green-200 bg-green-50' },
-          { label: 'Total Gross', value: fmtGBP(totalPending), sub: `${approved.length} claims`, color: 'border-[#2E8B8B]/30 bg-teal-bg' },
+          { label: 'Total Gross', value: fmtGBP(totalPending), sub: `${approved.length} claims`, color: 'border-[#6cffc6]/30 bg-teal-bg' },
           { label: 'Previously Posted', value: posted.length, sub: 'this period', color: 'border-gray-200 bg-gray-50' },
         ].map(stat => (
           <Card key={stat.label} className={`p-5 border ${stat.color}`}>
             <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">{stat.label}</p>
-            <p className="text-2xl font-bold text-[#1B2A4A]">{stat.value}</p>
+            <p className="text-2xl font-bold text-[#000053]">{stat.value}</p>
             <p className="text-sm text-gray-500 mt-0.5">{stat.sub}</p>
           </Card>
         ))}
@@ -244,7 +244,7 @@ export default function FinancePage() {
       {/* Approved Claims (Ready to Export) */}
       <div>
         <div className="flex items-center gap-3 mb-3">
-          <h2 className="text-lg font-bold text-[#1B2A4A]">Ready to Export</h2>
+          <h2 className="text-lg font-bold text-[#000053]">Ready to Export</h2>
           {approved.length > 0 && (
             <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">{approved.length}</span>
           )}
@@ -278,7 +278,7 @@ export default function FinancePage() {
       <AnimatePresence>
         {toast && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#1B2A4A] text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-3"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#000053] text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-3"
             onClick={() => setToast('')}>
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
             {toast}

@@ -12,7 +12,7 @@ export default function PeopleDirectory() {
     <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500">
        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 border-b border-gray-200 pb-6">
           <div>
-            <h1 className="text-3xl font-bold text-[#1B2A4A] tracking-tight">Global Directory</h1>
+            <h1 className="text-3xl font-bold text-[#000053] tracking-tight">Global Directory</h1>
             <p className="text-sm text-gray-500 mt-2 font-medium">Search the entire Meridian Engineering network.</p>
           </div>
           <div className="flex gap-3 w-full lg:w-auto relative">
@@ -22,7 +22,7 @@ export default function PeopleDirectory() {
              <input 
                type="text" 
                placeholder="Search names, emails, roles..." 
-               className="pl-11 pr-4 py-3 bg-white border border-gray-300 shadow-sm rounded-xl text-sm w-full lg:w-80 focus:ring-2 focus:ring-[#2E8B8B] focus:border-[#2E8B8B] outline-none transition-all placeholder:text-gray-400"
+               className="pl-11 pr-4 py-3 bg-white border border-gray-300 shadow-sm rounded-xl text-sm w-full lg:w-80 focus:ring-2 focus:ring-[#6cffc6] focus:border-[#6cffc6] outline-none transition-all placeholder:text-gray-400"
                value={search}
                onChange={e => setSearch(e.target.value)}
              />
@@ -38,12 +38,12 @@ export default function PeopleDirectory() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-2">
              {people && people.map((p: any) => (
                 <Link key={p.id} href={`/people/${p.id.split(':')[1]}`}>
-                   <Card interactive className="p-6 flex flex-col h-full border-gray-200 hover:border-[#2E8B8B]/50 hover:shadow-lg shadow-sm group cursor-pointer transition-all duration-300 animate-in fade-in slide-in-from-bottom-2">
+                   <Card interactive className="p-6 flex flex-col h-full border-gray-200 hover:border-[#6cffc6]/50 hover:shadow-lg shadow-sm group cursor-pointer transition-all duration-300 animate-in fade-in slide-in-from-bottom-2">
                        <div className="flex justify-between items-start mb-5">
                           <Avatar size="lg" name={`${p.first_name} ${p.last_name}`} url={p.avatar_url} className="ring-4 ring-gray-50 shadow-sm" />
-                          <Badge variant="info" className="bg-[#eaf5f5] text-[#2E8B8B] capitalize text-[10px] font-bold tracking-widest">{p.employment_type || 'fte'}</Badge>
+                          <Badge variant="info" className="bg-[#e8fff5] text-[#000053] capitalize text-[10px] font-bold tracking-widest">{p.employment_type || 'fte'}</Badge>
                        </div>
-                       <h3 className="font-bold text-lg text-[#1B2A4A] group-hover:text-[#2E8B8B] transition-colors leading-tight mb-1">{p.first_name} {p.last_name}</h3>
+                       <h3 className="font-bold text-lg text-[#000053] group-hover:text-[#000053] transition-colors leading-tight mb-1">{p.first_name} {p.last_name}</h3>
                        <p className="text-sm font-medium text-gray-500 line-clamp-1">{p.job_title}</p>
                        <p className="text-xs text-gray-400 truncate mt-1">{p.email}</p>
                        
