@@ -66,3 +66,40 @@ DEFINE FIELD IF NOT EXISTS attendees       ON expense_claim TYPE option<array<st
 DEFINE FIELD IF NOT EXISTS cost_split      ON expense_claim TYPE option<string>
   ASSERT $value IN ['equal','custom'] OR $value IS NONE;
 DEFINE FIELD IF NOT EXISTS attendee_amounts ON expense_claim TYPE option<array>;
+
+-- ── Batch claim membership ──────────────────────────────────────────────────
+DEFINE FIELD IF NOT EXISTS batch_id ON expense_claim TYPE option<record<batch_claim>>;
+
+-- ── Batch claim header ──────────────────────────────────────────────────────
+DEFINE TABLE IF NOT EXISTS batch_claim SCHEMALESS;
+DEFINE FIELD IF NOT EXISTS claimant        ON batch_claim TYPE record<person>;
+DEFINE FIELD IF NOT EXISTS title           ON batch_claim TYPE string;
+DEFINE FIELD IF NOT EXISTS period_start    ON batch_claim TYPE datetime;
+DEFINE FIELD IF NOT EXISTS period_end      ON batch_claim TYPE datetime;
+DEFINE FIELD IF NOT EXISTS default_project ON batch_claim TYPE option<string>;
+DEFINE FIELD IF NOT EXISTS status          ON batch_claim TYPE string DEFAULT 'draft';
+DEFINE FIELD IF NOT EXISTS submitted_at    ON batch_claim TYPE option<datetime>;
+DEFINE FIELD IF NOT EXISTS total_amount    ON batch_claim TYPE float DEFAULT 0.0;
+DEFINE FIELD IF NOT EXISTS line_count      ON batch_claim TYPE int DEFAULT 0;
+DEFINE FIELD IF NOT EXISTS created_at      ON batch_claim TYPE datetime DEFAULT time::now();
+
+-- ── Batch line relationship ─────────────────────────────────────────────────
+-- Connects a batch_claim (in) to individual expense_claims (out)
+DEFINE TABLE IF NOT EXISTS batch_line SCHEMALESS;
+DEFINE FIELD IF NOT EXISTS in    ON batch_line TYPE record<batch_claim>;
+DEFINE FIELD IF NOT EXISTS out   ON batch_line TYPE record<expense_claim>;
+DEFINE FIELD IF NOT EXISTS order ON batch_line TYPE int;
+
+-- ── Seed: Peter's draft batch for the Wednesday demo ───────────────────────
+-- Creates a draft batch with 0 lines (lines added during the demo flow)
+CREATE batch_claim:peter_april_2026 CONTENT {
+  claimant: person:peter_walsh,
+  title: 'Manchester client visit — April 2026',
+  period_start: <datetime>'2026-04-01T00:00:00Z',
+  period_end: <datetime>'2026-04-30T23:59:59Z',
+  default_project: 'P-4821',
+  status: 'draft',
+  total_amount: 0.0,
+  line_count: 0,
+  created_at: time::now()
+};

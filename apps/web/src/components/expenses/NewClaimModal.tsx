@@ -12,6 +12,7 @@ import { useAuth } from '../../lib/auth';
 import { ClaimTypeSelector, ClaimType } from './ClaimTypeSelector';
 import { MileageClaimForm } from './MileageClaimForm';
 import { GroupExpenseForm } from './GroupExpenseForm';
+import BatchClaimFlow from './batch/BatchClaimFlow';
 
 // ─── API helper ─────────────────────────────────────────────────────────────
 
@@ -363,16 +364,20 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
           onClick={onClose}
         />
 
-        {/* Modal panel */}
+        {/* Modal panel — full-screen for batch, narrow card for all others */}
         <motion.div
-          className="relative z-10 w-full sm:max-w-[540px] max-h-[100dvh] sm:max-h-[90vh] flex flex-col bg-white sm:rounded-2xl shadow-2xl overflow-hidden"
-          initial={{ y: 80, opacity: 0, scale: 0.97 }}
+          className={`relative z-10 flex flex-col bg-white shadow-2xl overflow-hidden ${
+            screen === 'batch'
+              ? 'w-full h-full sm:h-screen sm:rounded-none'
+              : 'w-full sm:max-w-[540px] max-h-[100dvh] sm:max-h-[90vh] sm:rounded-2xl'
+          }`}
+          initial={{ y: screen === 'batch' ? 0 : 80, opacity: 0, scale: screen === 'batch' ? 1 : 0.97 }}
           animate={{ y: 0, opacity: 1, scale: 1 }}
-          exit={{ y: 80, opacity: 0, scale: 0.97 }}
+          exit={{ y: screen === 'batch' ? 0 : 80, opacity: 0, scale: screen === 'batch' ? 1 : 0.97 }}
           transition={{ type: 'spring', damping: 26, stiffness: 320 }}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-white shrink-0">
+          {/* Header — hidden when batch flow manages its own header */}
+          {screen !== 'batch' && <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-white shrink-0">
             <div className="flex items-center gap-3">
               {screen === 'single' && stage === 2 && (
                 <button
@@ -402,7 +407,6 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                   {screen === 'single' && stage === 3 && 'Claim Submitted'}
                   {screen === 'mileage' && 'Mileage Claim'}
                   {screen === 'group' && 'Group Expense'}
-                  {screen === 'batch' && 'Multiple Receipts'}
                 </h2>
                 {screen === 'single' && (
                   <div className="flex gap-1.5 mt-1">
@@ -433,10 +437,10 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-          </div>
+          </div>}
 
           {/* Stage content */}
-          <div className="flex-1 overflow-y-auto">
+          <div className={`flex-1 relative ${screen === 'batch' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
             <AnimatePresence mode="wait" custom={direction}>
               {screen === 'select-type' && (
                 <motion.div key="select-type" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.22 }}>
@@ -454,11 +458,19 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                 </motion.div>
               )}
               {screen === 'batch' && (
-                <motion.div key="batch" custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.22 }} className="flex flex-col items-center justify-center p-8 text-center min-h-[420px]">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-2xl">⏳</div>
-                  <h3 className="font-bold text-[#000053] text-xl">Coming Soon</h3>
-                  <p className="text-sm text-gray-500 mt-2 max-w-sm">Multiple receipt batch claiming is coming soon. Use individual claims for now.</p>
-                  <button onClick={() => setScreen('single')} className="mt-6 text-[#000053] font-bold text-sm hover:underline">Start single claim →</button>
+                <motion.div
+                  key="batch"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute inset-0 flex flex-col"
+                >
+                  <BatchClaimFlow
+                    onClose={onClose}
+                    onSuccess={onSuccess}
+                    onBack={() => setScreen('select-type')}
+                  />
                 </motion.div>
               )}
               
@@ -1107,8 +1119,8 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
             </AnimatePresence>
           </div>
 
-          {/* Footer CTA */}
-          <div className="px-5 py-4 border-t border-gray-100 bg-white shrink-0">
+          {/* Footer CTA — batch flow manages its own footer */}
+          {screen !== 'batch' && <div className="px-5 py-4 border-t border-gray-100 bg-white shrink-0">
             {screen === 'single' && stage === 2 && (
               <motion.button
                 whileTap={{ scale: canSubmit ? 0.98 : 1 }}
@@ -1152,7 +1164,7 @@ export default function NewClaimModal({ onClose, onSuccess }: Props) {
                 Done
               </motion.button>
             )}
-          </div>
+          </div>}
         </motion.div>
       </motion.div>
     </AnimatePresence>

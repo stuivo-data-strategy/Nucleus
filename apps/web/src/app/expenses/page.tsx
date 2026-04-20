@@ -125,6 +125,150 @@ function StatusTracker({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+// ─── Batch claim helpers ──────────────────────────────────────────────────────
+
+function fmtPeriod(start: string, end: string): string {
+  const s = new Date(start);
+  const e = new Date(end);
+  if (s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear()) {
+    return s.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  }
+  return `${s.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} – ${e.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+}
+
+const CATEGORY_EMOJIS: Record<string, string> = {
+  meals: '🍽️', accommodation: '🏨', travel: '✈️',
+  transport: '🚕', fuel: '⛽', other: '📋',
+};
+
+function BatchDraftCard({ draft, onContinue }: { draft: any; onContinue: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="p-5 bg-amber-50 border border-amber-200 rounded-2xl shadow-sm flex items-center gap-4"
+    >
+      <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 text-xl">
+        🗂️
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-bold text-[#000053] truncate">{draft.title}</p>
+        <p className="text-xs text-gray-500 mt-0.5">
+          {draft.lineCount > 0
+            ? `${draft.lineCount} lines · £${Number(draft.totalAmount).toFixed(2)}`
+            : 'No lines yet'}
+          {' · '}Saved {fmtDate(draft.savedAt)}
+        </p>
+      </div>
+      <button
+        onClick={onContinue}
+        className="shrink-0 px-4 py-2 rounded-xl bg-[#000053] text-white text-sm font-bold hover:bg-[#000080] transition-colors"
+      >
+        Continue →
+      </button>
+    </motion.div>
+  );
+}
+
+function BatchSubmittedCard({ batch }: { batch: any }) {
+  const [expanded, setExpanded] = useState(false);
+  const lines: any[] = batch.lineItems ?? [];
+  const statusPill = 'bg-amber-100 text-amber-700';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="border border-gray-200 rounded-2xl shadow-sm overflow-hidden bg-white"
+    >
+      <button
+        onClick={() => setExpanded((e) => !e)}
+        className="w-full flex items-start gap-3 p-5 text-left hover:bg-gray-50/50 transition-colors"
+      >
+        {/* Stack-of-receipts icon */}
+        <div className="w-10 h-10 rounded-xl bg-[#000053]/5 flex items-center justify-center shrink-0 mt-0.5">
+          <svg className="w-6 h-6 text-[#000053]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <rect x="5" y="5" width="13" height="16" rx="1.5" />
+            <path d="M3 3h13a1 1 0 011 1v14" strokeLinecap="round" />
+            <path d="M8 10h7M8 13h5M8 16h3" strokeLinecap="round" />
+          </svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-bold text-[#000053] leading-snug">{batch.title}</p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {lines.length} expense{lines.length !== 1 ? 's' : ''}
+                {' · '}
+                <span className="font-mono font-bold text-[#000053]">
+                  £{Number(batch.totalAmount).toFixed(2)}
+                </span>
+                {batch.submittedAt && ` · Submitted ${fmtDate(batch.submittedAt)}`}
+              </p>
+              {batch.reference && (
+                <p className="text-xs font-mono text-gray-400 mt-0.5">{batch.reference}</p>
+              )}
+            </div>
+            <div className="shrink-0 text-right">
+              <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${statusPill}`}>
+                Pending approval
+              </span>
+              {batch.approver && (
+                <p className="text-[10px] text-gray-400 mt-1">→ {batch.approver}</p>
+              )}
+            </div>
+          </div>
+        </div>
+        <svg
+          className={`w-4 h-4 text-gray-400 shrink-0 mt-1 transition-transform ${expanded ? 'rotate-180' : ''}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <AnimatePresence>
+        {expanded && lines.length > 0 && (
+          <motion.div
+            initial={{ height: 0 }}
+            animate={{ height: 'auto' }}
+            exit={{ height: 0 }}
+            className="overflow-hidden border-t border-gray-100"
+          >
+            <div className="divide-y divide-gray-50">
+              {lines.map((line: any, i: number) => (
+                <div key={i} className="flex items-center gap-3 px-5 py-2.5">
+                  <span className="text-sm shrink-0">
+                    {CATEGORY_EMOJIS[line.category] ?? '📋'}
+                  </span>
+                  <span className="text-sm text-[#000053] font-medium flex-1 truncate">
+                    {line.merchant}
+                  </span>
+                  <span className="text-xs text-gray-400 shrink-0">{line.date}</span>
+                  <span className="font-mono text-sm font-bold text-[#000053] shrink-0">
+                    £{Number(line.amount).toFixed(2)}
+                  </span>
+                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                    line.effectivePolicyStatus === 'ok'
+                      ? 'bg-green-100 text-green-600'
+                      : line.effectivePolicyStatus === 'warning'
+                      ? 'bg-amber-100 text-amber-600'
+                      : 'bg-red-100 text-red-600'
+                  }`}>
+                    {line.effectivePolicyStatus === 'ok' ? '✓' : '⚠'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function ExpensesPage() {
   const { user } = useAuth();
   const userId = user?.sub ?? 'person:sarah_chen';
@@ -134,6 +278,10 @@ export default function ExpensesPage() {
   const [error, setError]             = useState<string | null>(null);
   const [selectedId, setSelectedId]   = useState<string | null>(null);
   const [showNewClaim, setShowNewClaim] = useState(false);
+
+  // Batch state — read from localStorage
+  const [batchDrafts, setBatchDrafts]       = useState<any[]>([]);
+  const [batchSubmitted, setBatchSubmitted] = useState<any[]>([]);
 
   // Inline query respond state
   const [queryTexts, setQueryTexts]   = useState<Record<string, string>>({});
@@ -152,7 +300,14 @@ export default function ExpensesPage() {
     }
   }, [userId]);
 
-  useEffect(() => { fetchClaims(); }, [fetchClaims]);
+  const loadBatchState = useCallback(() => {
+    try {
+      setBatchDrafts(JSON.parse(localStorage.getItem('nucleus_batch_drafts') || '[]'));
+      setBatchSubmitted(JSON.parse(localStorage.getItem('nucleus_batch_submitted') || '[]'));
+    } catch { /* ignore parse errors */ }
+  }, []);
+
+  useEffect(() => { fetchClaims(); loadBatchState(); }, [fetchClaims, loadBatchState]);
 
   // ── Summary aggregations ─────────────────────────────────────────────────
   const now = new Date();
@@ -237,6 +392,34 @@ export default function ExpensesPage() {
           </p>
         </Card>
       </div>
+
+      {/* ── Batch drafts ────────────────────────────────────────────────── */}
+      {batchDrafts.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-bold text-amber-700 uppercase tracking-wider flex items-center gap-2">
+            <span>🗂️</span> Drafts
+          </h2>
+          {batchDrafts.map((draft) => (
+            <BatchDraftCard
+              key={draft.id}
+              draft={draft}
+              onContinue={() => setShowNewClaim(true)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* ── Submitted batch claims ───────────────────────────────────────── */}
+      {batchSubmitted.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">
+            Batch Claims
+          </h2>
+          {batchSubmitted.map((batch, i) => (
+            <BatchSubmittedCard key={batch.reference ?? i} batch={batch} />
+          ))}
+        </div>
+      )}
 
       {/* ── Claims list ─────────────────────────────────────────────────── */}
       {loading ? (
@@ -385,7 +568,7 @@ export default function ExpensesPage() {
         {showNewClaim && (
           <NewClaimModal
             onClose={() => setShowNewClaim(false)}
-            onSuccess={() => { setShowNewClaim(false); fetchClaims(); }}
+            onSuccess={() => { setShowNewClaim(false); fetchClaims(); loadBatchState(); }}
           />
         )}
       </AnimatePresence>
