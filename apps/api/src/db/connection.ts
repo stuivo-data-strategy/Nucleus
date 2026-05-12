@@ -3,10 +3,18 @@ import { config } from '../config';
 import fs from 'fs';
 import path from 'path';
 
+// Keep-alive interval: ping SurrealDB every 30s to prevent idle disconnect.
+// Reconnect automatically if the connection drops.
+const KEEP_ALIVE_MS = 30_000;
+const RECONNECT_DELAY_MS = 3_000;
+const MAX_RECONNECT_ATTEMPTS = 10;
+
 class Database {
   public db: Surreal;
   private isConnected: boolean = false;
-  
+  private keepAliveTimer: ReturnType<typeof setInterval> | null = null;
+  private reconnecting: boolean = false;
+
   constructor() {
     this.db = new Surreal();
   }
@@ -24,7 +32,10 @@ class Database {
       });
       this.isConnected = true;
       console.log('Connected to SurrealDB');
-      
+
+      // Start keep-alive pings
+      this.startKeepAlive();
+
       // Run migrations on startup
       await this.runMigrations();
     } catch (error) {
@@ -32,6 +43,63 @@ class Database {
       this.isConnected = false;
       throw error;
     }
+  }
+
+  private startKeepAlive() {
+    this.stopKeepAlive();
+    this.keepAliveTimer = setInterval(async () => {
+      try {
+        // Lightweight query to keep the WS connection alive
+        await this.db.query('RETURN true');
+      } catch (err) {
+        console.warn('Keep-alive ping failed, attempting reconnect…', err);
+        this.isConnected = false;
+        this.reconnect();
+      }
+    }, KEEP_ALIVE_MS);
+  }
+
+  private stopKeepAlive() {
+    if (this.keepAliveTimer) {
+      clearInterval(this.keepAliveTimer);
+      this.keepAliveTimer = null;
+    }
+  }
+
+  private async reconnect() {
+    if (this.reconnecting) return;
+    this.reconnecting = true;
+    this.stopKeepAlive();
+
+    for (let attempt = 1; attempt <= MAX_RECONNECT_ATTEMPTS; attempt++) {
+      console.log(`Reconnect attempt ${attempt}/${MAX_RECONNECT_ATTEMPTS}…`);
+      try {
+        // Create a fresh Surreal instance for a clean connection
+        this.db = new Surreal();
+        await this.db.connect(config.surreal.url);
+        await this.db.signin({
+          username: config.surreal.user,
+          password: config.surreal.pass,
+        });
+        await this.db.use({
+          namespace: config.surreal.ns,
+          database: config.surreal.db,
+        });
+        this.isConnected = true;
+        this.reconnecting = false;
+        console.log('Reconnected to SurrealDB');
+        this.startKeepAlive();
+        return;
+      } catch (err) {
+        console.error(`Reconnect attempt ${attempt} failed:`, err);
+        if (attempt < MAX_RECONNECT_ATTEMPTS) {
+          await new Promise(r => setTimeout(r, RECONNECT_DELAY_MS * attempt));
+        }
+      }
+    }
+
+    this.reconnecting = false;
+    console.error('All reconnect attempts exhausted — SurrealDB is unreachable');
   }
 
   async runMigrations() {
@@ -83,11 +151,15 @@ class Database {
   }
 
   async close() {
+    this.stopKeepAlive();
     await this.db.close();
     this.isConnected = false;
   }
-  
+
   getDb() {
+    if (!this.isConnected && !this.reconnecting) {
+      this.reconnect();
+    }
     return this.db;
   }
 
