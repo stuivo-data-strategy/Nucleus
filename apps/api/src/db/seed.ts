@@ -1,4 +1,5 @@
 import { dbConnection } from './connection';
+import { ExpenseService } from '../services/expense.service';
 
 export const DEMO_USER = 'person:sarah_chen';
 
@@ -293,6 +294,61 @@ async function seed() {
   await db.query(`RELATE person:amara_okafor->has_role->role:finance_approver;`);
   await db.query(`RELATE person:lisa_thornton->has_role->role:expenses_auditor;`);
   await db.query(`RELATE person:daniel_frost->has_role->role:vat_officer;`);
+
+  console.log("Seeding Sample Expense Claims (via service)...");
+  await db.query(`DELETE workflow_action; DELETE workflow_instance; DELETE policy_audit; DELETE expense_claim;`);
+
+  const expSvc = new ExpenseService(db);
+
+  // Claims to submit through the proper service pipeline
+  const claimDefs = [
+    { claimant: DEMO_USER, body: { category: 'meals', amount: 42.50, date: '2025-04-15', has_receipt: true, description: 'Client lunch — Project Alpha kickoff', currency: 'GBP' }, then: 'approve' },
+    { claimant: DEMO_USER, body: { category: 'travel', amount: 186.00, date: '2025-04-22', has_receipt: true, description: 'Train to London — stakeholder workshop', currency: 'GBP' }, then: 'approve' },
+    { claimant: DEMO_USER, body: { category: 'accommodation', amount: 165.00, date: '2025-05-02', has_receipt: true, description: 'Premier Inn Manchester — late project session', currency: 'GBP' }, then: 'pending' },
+    { claimant: DEMO_USER, body: { category: 'meals', amount: 89.00, date: '2025-04-28', has_receipt: true, description: 'Team dinner — sprint completion', currency: 'GBP', exception_requested: true, exception_justification: 'Group dinner for 4 team members after sprint delivery' }, then: 'query' },
+    { claimant: DEMO_USER, body: { category: 'meals', amount: 28.50, date: '2025-05-08', has_receipt: true, description: 'Working lunch with vendor', currency: 'GBP' }, then: 'pending' },
+    { claimant: DEMO_USER, body: { category: 'office_supplies', amount: 67.99, date: '2025-05-01', has_receipt: true, description: 'USB-C hub and cables for home office', currency: 'GBP' }, then: 'pending' },
+  ];
+
+  for (const def of claimDefs) {
+    try {
+      const result = await expSvc.submitClaim(def.claimant, def.body);
+      const claimId = result.claim.id;
+      const workflowId = result.workflow?.id?.toString ? result.workflow.id.toString() : result.workflow?.id;
+
+      if (!workflowId) {
+        console.log(`  ${def.body.description} — submitted (no workflow)`);
+        continue;
+      }
+
+      // Find the first step's approver to action as them
+      const steps = result.workflow?.steps || [];
+      const firstApprover = steps[0]?.approver_id;
+
+      if (def.then === 'approve' && firstApprover) {
+        // Approve through all steps
+        for (const step of steps) {
+          try {
+            await expSvc.processAction(claimId, step.approver_id, 'approve', 'Approved');
+          } catch { break; }
+        }
+        console.log(`  ${def.body.description} — approved`);
+      } else if (def.then === 'query' && firstApprover) {
+        await expSvc.processAction(claimId, firstApprover, 'query', 'Was this just your team or did it include external guests?');
+        console.log(`  ${def.body.description} — queried`);
+      } else {
+        console.log(`  ${def.body.description} — pending approval`);
+      }
+    } catch (err: any) {
+      console.error(`  FAILED: ${def.body.description} — ${err.message}`);
+    }
+  }
+
+  // Count what was created
+  const claimCount = ((await db.query(`SELECT count() FROM expense_claim GROUP ALL`))[0] as any[])?.[0]?.count ?? 0;
+  const wfCount = ((await db.query(`SELECT count() FROM workflow_instance GROUP ALL`))[0] as any[])?.[0]?.count ?? 0;
+  const auditCount = ((await db.query(`SELECT count() FROM policy_audit GROUP ALL`))[0] as any[])?.[0]?.count ?? 0;
+  console.log(`  Created ${claimCount} claims, ${wfCount} workflow instances, ${auditCount} policy audit records.`);
 
   console.log("Seeding Complete!");
   await dbConnection.close();

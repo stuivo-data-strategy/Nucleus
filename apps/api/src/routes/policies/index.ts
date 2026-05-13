@@ -3,12 +3,12 @@ import { PolicyService } from '../../services/policy.service';
 import { getDb } from '../../db/connection';
 
 const policyRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
-  const policyService = new PolicyService(getDb());
 
   fastify.post('/validate', async (request, reply) => {
+    const policyService = new PolicyService(getDb());
     const { category, amount, has_receipt, date } = request.body as any;
     const claimant_id = (request.user as any)?.id || 'person:sarah_chen';
-    
+
     const result = await policyService.validateClaim({
       category, amount, has_receipt, date, claimant_id
     });
@@ -16,11 +16,13 @@ const policyRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> =>
   });
 
   fastify.get('/rules', async (request, reply) => {
+    const policyService = new PolicyService(getDb());
     const rules = await policyService.getAllPolicyRules();
     return { status: 'success', data: rules };
   });
 
   fastify.patch('/rules/category/:category', async (request, reply) => {
+    const policyService = new PolicyService(getDb());
     const params = request.params as any;
     const updates = request.body as any;
     const updatedBy = (request.headers as any)['x-user-id'] || (request.user as any)?.id || 'system';
@@ -29,12 +31,14 @@ const policyRoutes: FastifyPluginAsync = async (fastify, opts): Promise<void> =>
   });
 
   fastify.get('/audit/:claimId', async (request, reply) => {
+    const policyService = new PolicyService(getDb());
     const params = request.params as any;
     const entries = await policyService.getPolicyAuditTrail(params.id === 'POLICY_CHANGE' ? 'POLICY_CHANGE' : params.claimId);
     return { status: 'success', data: entries };
   });
 
   fastify.get('/thresholds', async (request, reply) => {
+    const policyService = new PolicyService(getDb());
     const thresholds = await policyService.getApprovalThresholds();
     return { status: 'success', data: thresholds };
   });

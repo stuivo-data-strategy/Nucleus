@@ -13,8 +13,8 @@ export class PolicyService {
   }): Promise<PolicyResult> {
     const checks: PolicyCheck[] = [];
 
-    // 1. Fetch policy rule
-    const res = await this.db.query(`SELECT * FROM policy_rule WHERE category = $cat LIMIT 1`, { cat: claim.category });
+    // 1. Fetch the spending-limit policy rule (skip validation-only rules that lack max_amount)
+    const res = await this.db.query(`SELECT * FROM policy_rule WHERE category = $cat AND max_amount != NONE LIMIT 1`, { cat: claim.category });
     const arr = res[0] as any[];
     const rule = arr && arr.length > 0 ? arr[0] : null;
 

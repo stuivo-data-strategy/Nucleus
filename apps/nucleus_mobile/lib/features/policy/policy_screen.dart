@@ -120,6 +120,7 @@ class _PolicyScreenState extends State<PolicyScreen> {
 
       final rulesData = (results[0]['data'] as List<dynamic>?)
               ?.map((e) => Map<String, dynamic>.from(e as Map))
+              .where((r) => r['max_amount'] != null) // only spending-limit rules
               .toList() ??
           [];
       final auditData = (results[1]['data'] as List<dynamic>?)
