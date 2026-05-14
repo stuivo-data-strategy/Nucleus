@@ -1,0 +1,65 @@
+import { PolicyResult } from './policy';
+import { WorkflowInstance } from './workflow';
+
+export type ExpenseStatus =
+  | 'submitted'
+  | 'pending'
+  | 'in_progress'
+  | 'queried'
+  | 'approved'
+  | 'rejected'
+  | 'posted';
+
+export interface ExpenseClaim {
+  id: string;
+  reference: string;            // EXP-001
+  claimant: string;             // person:sarah_chen
+  category: string;             // meals, travel, accommodation …
+  amount: number;
+  currency: string;             // GBP
+  description: string;
+  date: string;                 // ISO date string
+  has_receipt: boolean;
+  receipt_url?: string;
+  status: ExpenseStatus;
+  policy_result?: PolicyResult; // snapshot at submission time
+  policy_result_approval?: PolicyResult; // snapshot re-evaluated at approval
+  workflow_instance?: string;   // workflow_instance:<id>
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ExpenseClaimEnriched extends ExpenseClaim {
+  claimant_name: string;
+  claimant_initials: string;
+  claimant_job_title?: string;
+  claimant_department?: string;
+  workflow?: WorkflowInstance;
+}
+
+export interface OcrResult {
+  vendor: string;
+  date: string;
+  amount: number;
+  currency: string;
+  category_suggestion: string;
+  confidence: number;
+}
+
+export interface ExportRow {
+  ClaimID: string;
+  EmployeeID: string;
+  EmployeeName: string;
+  CostCentre: string;
+  GLCode: string;
+  AmountNet: string;
+  VATRate: string;
+  VATAmount: string;
+  AmountGross: string;
+  Currency: string;
+  Category: string;
+  Description: string;
+  Date: string;
+  ApprovedBy: string;
+  ApprovedDate: string;
+}

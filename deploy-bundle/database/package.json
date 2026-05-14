@@ -1,0 +1,6 @@
+{
+  "name": "nucleus-database-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Compiled ESM setup/reset scripts for the Nucleus SurrealDB database. Run with plain Node — no tsx required."
+}

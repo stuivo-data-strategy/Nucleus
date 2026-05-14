@@ -1,0 +1,11 @@
+# This directory is a self-contained offline deployment artifact and MUST ship
+# its production node_modules — the target server has no internet access.
+#
+# The root .gitignore excludes `node_modules` everywhere. We override that
+# exclusion here, scoped to this directory only. The root .gitignore is
+# deliberately not modified.
+#
+# Re-include both the directory itself and all of its contents (git won't
+# look inside a directory that's still excluded, so both lines are required).
+!node_modules/
+!node_modules/**
