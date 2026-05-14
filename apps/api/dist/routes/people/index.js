@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const people_service_1 = require("../../services/people.service");
 const connection_1 = require("../../db/connection");
-const seed_1 = require("../../db/seed");
+const constants_1 = require("../../db/constants");
 const peopleRoutes = async (fastify, opts) => {
     fastify.get('/', async (request, reply) => {
         const srv = new people_service_1.PeopleService((0, connection_1.getDb)());
@@ -16,7 +16,7 @@ const peopleRoutes = async (fastify, opts) => {
     fastify.get('/me', async (request, reply) => {
         const srv = new people_service_1.PeopleService((0, connection_1.getDb)());
         // Use auth data/demo user for bypass
-        const actorId = request.headers['x-user-id'] || seed_1.DEMO_USER;
+        const actorId = request.headers['x-user-id'] || constants_1.DEMO_USER;
         const data = await srv.getPerson(actorId);
         return { data };
     });
@@ -43,6 +43,13 @@ const peopleRoutes = async (fastify, opts) => {
     fastify.get('/:id/permissions', async (request, reply) => {
         const srv = new people_service_1.PeopleService((0, connection_1.getDb)());
         const data = await srv.getPermissions(request.params.id);
+        return { data };
+    });
+    fastify.get('/:id/context', async (request, reply) => {
+        const srv = new people_service_1.PeopleService((0, connection_1.getDb)());
+        const data = await srv.getPersonContext(request.params.id);
+        if (!data)
+            return reply.code(404).send({ error: 'Person not found' });
         return { data };
     });
 };

@@ -33,7 +33,7 @@ const authRoutes = async (fastify, opts) => {
     });
     fastify.get('/switch-options', async (request, reply) => {
         const srv = new people_service_1.PeopleService((0, connection_1.getDb)());
-        const ids = ['person:sarah_chen', 'person:james_morton', 'person:peter_blackwell', 'person:margaret_thornton', 'person:amara_okafor'];
+        const ids = ['person:sarah_chen', 'person:james_morton', 'person:peter_blackwell', 'person:peter_diciacca', 'person:amara_okafor', 'person:lisa_thornton', 'person:daniel_frost'];
         const users = await Promise.all(ids.map(id => srv.getPerson(id)));
         return { data: users.filter(u => !!u).map(u => ({
                 id: u.id, name: `${u.first_name} ${u.last_name}`, title: u.job_title, avatar_url: u.avatar_url

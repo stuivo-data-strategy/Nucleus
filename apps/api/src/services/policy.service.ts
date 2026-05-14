@@ -4,6 +4,22 @@ import { PolicyCheck, PolicyResult, PolicyAuditEntry, PolicyRule } from '@nucleu
 export class PolicyService {
   constructor(private db: Surreal) {}
 
+  // Safely serialise a SurrealDB record to a JSON string.
+  // Handles RecordId objects, BigInts, Decimals and other non-JSON-safe values.
+  private safeStringify(obj: any): string {
+    try {
+      return JSON.stringify(obj, (_key, value) => {
+        if (typeof value === 'bigint') return Number(value);
+        if (value !== null && typeof value === 'object' && typeof value.toJSON === 'function') {
+          return value.toJSON();
+        }
+        return value;
+      });
+    } catch {
+      return '{}';
+    }
+  }
+
   async validateClaim(claim: {
     category: string;
     amount: number;
@@ -143,7 +159,7 @@ export class PolicyService {
     return {
       passed: fails === 0,
       timestamp: new Date().toISOString(),
-      rule_version: rule ? JSON.stringify(rule) : '{}',
+      rule_version: rule ? this.safeStringify(rule) : '{}',
       checks,
       summary: { total: checks.length, passed: passes, warnings: warns, failures: fails }
     };
@@ -199,7 +215,9 @@ export class PolicyService {
     updates: Partial<Pick<PolicyRule, 'max_amount' | 'receipt_threshold' | 'per_diem_rate'>>,
     updatedBy: string
   ): Promise<PolicyRule> {
-    const curRes = await this.db.query(`SELECT * FROM policy_rule WHERE category = $cat LIMIT 1`, { cat: category });
+    // Only target spending-limit rules (those with max_amount) to avoid updating
+    // validation-only rules that share the same category (e.g. group_meals).
+    const curRes = await this.db.query(`SELECT * FROM policy_rule WHERE category = $cat AND max_amount != NONE LIMIT 1`, { cat: category });
     const curArr = curRes[0] as any[];
     if (!curArr || curArr.length === 0) throw new Error(`Policy rule not found for category: ${category}`);
     const oldId: string = curArr[0].id?.toString?.() ?? String(curArr[0].id);
@@ -208,7 +226,7 @@ export class PolicyService {
     // Use the stringified record ID directly — e.g. "UPDATE policy_rule:meals MERGE $data"
     await this.db.query(`UPDATE ${oldId} MERGE $data`, { data: updates });
 
-    const upRes = await this.db.query(`SELECT * FROM policy_rule WHERE category = $cat LIMIT 1`, { cat: category });
+    const upRes = await this.db.query(`SELECT * FROM policy_rule WHERE category = $cat AND max_amount != NONE LIMIT 1`, { cat: category });
     const upArr = upRes[0] as any[];
     const newId: string = upArr[0].id?.toString?.() ?? String(upArr[0].id);
     const newRule = { ...upArr[0], id: newId };

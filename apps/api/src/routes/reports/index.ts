@@ -37,21 +37,26 @@ function buildDateClauses(dateFrom?: string, dateTo?: string): string[] {
   return parts;
 }
 
+/** Escape single-quotes for safe SurrealQL string interpolation */
+function esc(s: string): string {
+  return s.replace(/'/g, "\\'");
+}
+
 function buildClaimConditions(params: QueryParams): string[] {
   const { category, status, dateFrom, dateTo, personName } = params;
   const conds: string[] = [];
 
-  if (category) conds.push(`category = '${category}'`);
+  if (category) conds.push(`category = '${esc(category)}'`);
 
   if (status) {
     const statuses = Array.isArray(status) ? status : [status];
-    conds.push(`status IN [${statuses.map(s => `'${s}'`).join(', ')}]`);
+    conds.push(`status IN [${statuses.map(s => `'${esc(s)}'`).join(', ')}]`);
   }
 
   conds.push(...buildDateClauses(dateFrom, dateTo));
 
   if (personName) {
-    const n = personName.toLowerCase();
+    const n = esc(personName.toLowerCase());
     conds.push(`(string::lowercase(claimant.first_name) CONTAINS '${n}' OR string::lowercase(claimant.last_name) CONTAINS '${n}')`);
   }
 

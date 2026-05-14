@@ -267,22 +267,36 @@ String? _extractPersonName(String original) {
     'last', 'next', 'recent', 'latest', 'top', 'biggest', 'largest',
     'highest', 'most', 'average', 'mean', 'sum', 'count', 'number',
     'pending', 'approved', 'rejected', 'queried', 'submitted',
+    'category', 'status', 'time', 'date', 'budget', 'policy',
   };
 
   final words = original.split(RegExp(r'\s+'));
   final names = <String>[];
   for (final w in words) {
-    if (w.length <= 2) continue;
-    if (w[0] != w[0].toUpperCase()) continue;
-    if (w == w.toUpperCase()) continue; // all-caps
-    final lower = w.toLowerCase();
+    // Strip trailing punctuation / possessives  e.g. "What's" → "What", "John?" → "John"
+    final clean = w.replaceAll(RegExp(r"[''`?,!.;:]+\w*$"), '');
+    if (clean.length <= 2) continue;
+    if (clean[0] != clean[0].toUpperCase()) continue;
+    if (clean == clean.toUpperCase()) continue; // all-caps
+    final lower = clean.toLowerCase();
     if (stopWords.contains(lower)) continue;
-    names.add(w);
+    names.add(clean);
   }
   return names.isNotEmpty ? names.join(' ') : null;
 }
 
-/// Suggestions shown on the welcome screen.
+/// The single, persistent set of suggestion chips shown beneath the input.
+/// These remain visible at all times — selecting one runs the query but the
+/// chips stay so the user can pick another.
+const persistentSuggestions = [
+  'Show me meals expenses this month',
+  'Spend by category',
+  'Claims by status',
+  'Spend trend over time',
+  'Top 10 largest claims',
+];
+
+/// Suggestions shown on the welcome screen (legacy — kept for compat).
 const welcomeSuggestions = [
   'Show me meals expenses this month',
   "What's our total spend by category?",

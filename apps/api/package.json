@@ -4,7 +4,7 @@
   "description": "Fastify backend",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node -e \"const fs=require('fs'),p=require('path');const s=p.join('src','db','migrations'),d=p.join('dist','db','migrations');if(fs.existsSync(s)){fs.mkdirSync(d,{recursive:true});fs.readdirSync(s).filter(f=>f.endsWith('.surql')).forEach(f=>fs.copyFileSync(p.join(s,f),p.join(d,f)));console.log('Copied migrations to dist')}\"",
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "lint": "eslint src/**/*.ts",

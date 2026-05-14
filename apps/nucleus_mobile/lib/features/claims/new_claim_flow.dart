@@ -136,7 +136,7 @@ class _NewClaimWidgetState extends State<_NewClaimWidget> {
 // Type Selector
 // ---------------------------------------------------------------------------
 
-class _TypeSelector extends StatefulWidget {
+class _TypeSelector extends StatelessWidget {
   final ValueChanged<_ClaimScreen> onSelect;
   final VoidCallback onClose;
 
@@ -145,13 +145,6 @@ class _TypeSelector extends StatefulWidget {
     required this.onSelect,
     required this.onClose,
   });
-
-  @override
-  State<_TypeSelector> createState() => _TypeSelectorState();
-}
-
-class _TypeSelectorState extends State<_TypeSelector> {
-  _ClaimScreen? _selected;
 
   static const _types = [
     (
@@ -187,7 +180,7 @@ class _TypeSelectorState extends State<_TypeSelector> {
         // Header
         _ClaimHeader(
           title: 'New Expense Claim',
-          onClose: widget.onClose,
+          onClose: onClose,
         ),
         Expanded(
           child: Padding(
@@ -209,32 +202,14 @@ class _TypeSelectorState extends State<_TypeSelector> {
                     mainAxisSpacing: 12,
                     crossAxisSpacing: 12,
                     childAspectRatio: 1.3,
-                    children: _types.map((t) {
-                      final isActive = _selected == t.screen;
-                      return _TypeCard(
-                        icon: t.icon,
-                        label: t.label,
-                        desc: t.desc,
-                        isActive: isActive,
-                        onTap: () => setState(() => _selected = t.screen),
-                      );
-                    }).toList(),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                AnimatedOpacity(
-                  opacity: _selected != null ? 1 : 0,
-                  duration: const Duration(milliseconds: 200),
-                  child: FilledButton(
-                    onPressed: _selected != null
-                        ? () => widget.onSelect(_selected!)
-                        : null,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: NucleusColors.accentTeal,
-                      minimumSize: const Size(double.infinity, 48),
-                    ),
-                    child: const Text('Continue',
-                        style: TextStyle(fontWeight: FontWeight.w600)),
+                    children: _types
+                        .map((t) => _TypeCard(
+                              icon: t.icon,
+                              label: t.label,
+                              desc: t.desc,
+                              onTap: () => onSelect(t.screen),
+                            ))
+                        .toList(),
                   ),
                 ),
               ],
@@ -250,14 +225,12 @@ class _TypeCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final String desc;
-  final bool isActive;
   final VoidCallback onTap;
 
   const _TypeCard({
     required this.icon,
     required this.label,
     required this.desc,
-    required this.isActive,
     required this.onTap,
   });
 
@@ -266,14 +239,9 @@ class _TypeCard extends StatelessWidget {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: isActive ? NucleusColors.accentTeal : Colors.grey[200]!,
-          width: isActive ? 2 : 1,
-        ),
+        side: BorderSide(color: Colors.grey[200]!, width: 1),
       ),
-      color: isActive
-          ? NucleusColors.accentTeal.withValues(alpha: 0.05)
-          : Colors.white,
+      color: Colors.white,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
@@ -286,15 +254,11 @@ class _TypeCard extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: isActive
-                      ? NucleusColors.accentTeal
-                      : NucleusColors.accentTeal.withValues(alpha: 0.1),
+                  color: NucleusColors.accentTeal.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 alignment: Alignment.center,
-                child: Icon(icon,
-                    size: 20,
-                    color: isActive ? Colors.white : NucleusColors.accentTeal),
+                child: Icon(icon, size: 20, color: NucleusColors.accentTeal),
               ),
               const Spacer(),
               Text(
@@ -880,6 +844,7 @@ class _SingleClaimFlowState extends State<_SingleClaimFlow> {
   List<Map<String, dynamic>> _policyChecks = [];
   bool _policyLoading = false;
   bool _hasAmountFail = false;
+  String? _policyError;
   Timer? _policyDebounce;
 
   // Route
@@ -950,8 +915,21 @@ class _SingleClaimFlowState extends State<_SingleClaimFlow> {
     _policyDebounce?.cancel();
     _policyDebounce = Timer(const Duration(milliseconds: 300), () async {
       final amount = _claimAmount;
-      if (amount <= 0) return;
-      setState(() => _policyLoading = true);
+      if (amount <= 0) {
+        if (mounted) {
+          setState(() {
+            _policyChecks = [];
+            _policyError = null;
+            _hasAmountFail = false;
+          });
+        }
+        return;
+      }
+      if (!mounted) return;
+      setState(() {
+        _policyLoading = true;
+        _policyError = null;
+      });
       try {
         final api = context.read<ApiClient>();
         final resp = await api.post('/policies/validate', body: {
@@ -972,10 +950,17 @@ class _SingleClaimFlowState extends State<_SingleClaimFlow> {
                 c['rule_name'] == 'Category Limit' &&
                 c['severity'] == 'fail');
             _policyLoading = false;
+            _policyError = null;
           });
         }
-      } catch (_) {
-        if (mounted) setState(() => _policyLoading = false);
+      } catch (e) {
+        debugPrint('Policy validation error: $e');
+        if (mounted) {
+          setState(() {
+            _policyLoading = false;
+            _policyError = 'Policy check unavailable — tap to retry';
+          });
+        }
       }
     });
   }
@@ -1298,6 +1283,37 @@ class _SingleClaimFlowState extends State<_SingleClaimFlow> {
           ),
           const SizedBox(height: 20),
           // Policy checks
+          if (_policyError != null && _policyChecks.isEmpty) ...[
+            const Text('Policy Checks',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: _debouncePolicy,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: NucleusColors.warning.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: NucleusColors.warning.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.refresh, size: 18, color: Color(0xFFB45309)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _policyError!,
+                        style: const TextStyle(fontSize: 13, color: Color(0xFFB45309)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
           if (_policyChecks.isNotEmpty) ...[
             const Text('Policy Checks',
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),

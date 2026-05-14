@@ -23,7 +23,7 @@ const server = (0, fastify_1.default)({
     },
 });
 async function buildServer() {
-    await server.register(cors_1.default, { origin: true });
+    await server.register(cors_1.default, { origin: true, methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] });
     await server.register(websocket_1.default);
     await server.register(sensible_1.default);
     await server.register(jwt_1.default, { secret: config_1.config.jwtSecret });

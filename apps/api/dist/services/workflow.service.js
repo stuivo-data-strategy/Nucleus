@@ -26,6 +26,7 @@ class WorkflowService {
                 last_name: mgr.last_name,
                 avatar_initials: this.getInitials(mgr),
                 job_title: mgr.job_title || 'Manager',
+                role_label: '',
                 resolution_method: 'reports_to',
                 resolution_path: `${initiatorName} →[reports_to]→ ${mgrName}`
             };
@@ -73,6 +74,7 @@ class WorkflowService {
                         last_name: owner.last_name,
                         avatar_initials: this.getInitials(owner),
                         job_title: owner.job_title || 'Cost Centre Owner',
+                        role_label: '',
                         resolution_method: 'owns_budget',
                         resolution_path: `${prefix}${ownerName}`
                     };
@@ -95,6 +97,27 @@ class WorkflowService {
         }
         throw new Error('Failed to resolve cost centre owner Hierarchy');
     }
+    async resolveSkipLevelManager(personId, initiatorName) {
+        const res = await this.db.query(`
+      SELECT ->reports_to->person->reports_to->person.* AS skip_managers FROM type::record($id)
+    `, { id: personId });
+        const arr = res[0];
+        if (arr && arr[0] && arr[0].skip_managers && arr[0].skip_managers.length > 0) {
+            const mgr = arr[0].skip_managers[0];
+            const mgrName = this.getPersonName(mgr);
+            return {
+                person_id: mgr.id.toString(),
+                first_name: mgr.first_name,
+                last_name: mgr.last_name,
+                avatar_initials: this.getInitials(mgr),
+                job_title: mgr.job_title || 'Senior Manager',
+                role_label: '',
+                resolution_method: 'skip_level',
+                resolution_path: `${initiatorName} →[reports_to]→ Manager →[reports_to]→ ${mgrName}`
+            };
+        }
+        throw new Error(`Skip-level manager not found for ${personId}`);
+    }
     async resolveRoleBased(roleId) {
         // roleId is like 'finance_approver' or 'role:finance_approver'
         const roleBaseName = roleId.replace('role:', '');
@@ -113,6 +136,7 @@ class WorkflowService {
                 last_name: holder.last_name,
                 avatar_initials: this.getInitials(holder),
                 job_title: holder.job_title || 'Approver',
+                role_label: '',
                 resolution_method: 'role_lookup',
                 resolution_path: `Role lookup: ${roleBaseName} → ${holderName} (${holder.job_title || 'Role Approver'})`
             };
@@ -143,14 +167,19 @@ class WorkflowService {
             if (templateStep.condition?.min_amount && context.amount < templateStep.condition.min_amount) {
                 skipped_steps.push({
                     step: templateStep.order,
-                    reason: `Skipped: amount £${context.amount} below threshold £${templateStep.condition.min_amount}`
+                    label: templateStep.label,
+                    reason: `Skipped: amount £${context.amount} below threshold £${templateStep.condition.min_amount}`,
+                    min_amount: templateStep.condition.min_amount
                 });
                 resolution_log.push(`Step ${templateStep.order} (${templateStep.label}): SKIPPED — amount below £${templateStep.condition.min_amount}`);
                 continue;
             }
             let approver;
             try {
-                if (templateStep.resolver === 'direct_manager') {
+                if (templateStep.resolver === 'skip_level_manager') {
+                    approver = await this.resolveSkipLevelManager(initiatorId, initiatorName);
+                }
+                else if (templateStep.resolver === 'direct_manager') {
                     approver = await this.resolveDirectManager(initiatorId, initiatorName);
                 }
                 else if (templateStep.resolver === 'cost_centre_owner') {
@@ -167,6 +196,7 @@ class WorkflowService {
                 resolution_log.push(`Step ${templateStep.order} (${templateStep.label}): FAILED — ${e.message}`);
                 throw e;
             }
+            approver.role_label = templateStep.label;
             resolution_log.push(`Step ${templateStep.order} (${templateStep.label}): ${approver.first_name} ${approver.last_name}`);
             resolution_log.push(`  Resolved via: ${approver.resolution_path}`);
             existingApproverIds.push(approver.person_id);
@@ -188,7 +218,7 @@ class WorkflowService {
         }));
         const status = instanceSteps.length > 0 ? 'in_progress' : 'approved';
         const instanceData = {
-            template_name: templateName,
+            template: `workflow_template:${templateName}`,
             initiator: initiatorId,
             subject_type: subjectType,
             subject_id: subjectId,
@@ -294,16 +324,25 @@ class WorkflowService {
         return updArr[0];
     }
     async getPendingApprovals(personId) {
-        const res = await this.db.query(`
-      SELECT * FROM workflow_instance WHERE status IN ['pending', 'in_progress']
-    `);
-        const all = res[0];
-        return all.filter(instance => {
-            if (instance.current_step < 1)
-                return false;
-            const currentStep = instance.steps[instance.current_step - 1];
-            return currentStep && currentStep.approver_id === personId && currentStep.status === 'pending';
-        });
+        try {
+            const res = await this.db.query(`
+        SELECT * FROM workflow_instance WHERE status IN ['pending', 'in_progress']
+      `);
+            const all = res[0];
+            if (!all || all.length === 0)
+                return [];
+            return all.filter(instance => {
+                if (instance.current_step < 1)
+                    return false;
+                const currentStep = instance.steps[instance.current_step - 1];
+                return currentStep && currentStep.approver_id === personId && currentStep.status === 'pending';
+            });
+        }
+        catch (err) {
+            if (err.message?.includes('does not exist'))
+                return [];
+            throw err;
+        }
     }
     async getForInitiator(personId) {
         const res = await this.db.query(`SELECT * FROM workflow_instance WHERE initiator = $personId ORDER BY created_at DESC`, { personId });
@@ -316,27 +355,18 @@ class WorkflowService {
             throw new Error('Instance not found');
         const instance = instanceArray[0];
         const actionRes = await this.db.query(`
-      SELECT 
-         action, 
-         note, 
-         created_at,
-         actor as actor_id,
-         (SELECT first_name, last_name FROM type::record(actor)) as actor_data
+      SELECT action, note, created_at, actor as actor_id
       FROM workflow_action 
       WHERE instance = $id 
       ORDER BY created_at ASC
     `, { id: instanceId });
         const actionsRaw = actionRes[0];
-        const actions = actionsRaw.map(a => {
-            const ad = (a.actor_data && a.actor_data.length > 0) ? a.actor_data[0] : { first_name: 'Unknown', last_name: 'User' };
-            return {
-                action: a.action,
-                actor_name: `${ad.first_name} ${ad.last_name}`.trim(),
-                actor_initials: `${(ad.first_name || '')[0]}${(ad.last_name || '')[0]}`.toUpperCase(),
-                note: a.note,
-                created_at: a.created_at
-            };
-        });
+        const actions = actionsRaw.map(a => ({
+            action: a.action,
+            actor_id: a.actor_id,
+            note: a.note,
+            created_at: a.created_at
+        }));
         return {
             instance,
             actions,

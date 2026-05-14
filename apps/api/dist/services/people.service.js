@@ -33,11 +33,15 @@ class PeopleService {
         return arr[0] || null;
     }
     async getDirectReports(id) {
-        const result = await this.db.query(`SELECT <-reports_to<-person.* AS reports FROM person WHERE id = $id`, { id: new surrealdb_1.StringRecordId(id) });
+        const result = await this.db.query(`SELECT <-reports_to<-person.{id, first_name, last_name, job_title, org_unit, email, employee_id, employment_type} AS reports FROM person WHERE id = $id`, { id: new surrealdb_1.StringRecordId(id) });
         const arr = result[0];
-        if (arr[0] && arr[0].reports)
-            return arr[0].reports;
-        return [];
+        const reports = arr[0]?.reports ?? [];
+        const clean = (p) => ({ ...p, id: p.id?.toString?.() ?? p.id });
+        const withCounts = await Promise.all(reports.map(clean).map(async (dr) => {
+            const cRes = await this.db.query(`SELECT count(<-reports_to<-person) AS n FROM person WHERE id = $id`, { id: new surrealdb_1.StringRecordId(dr.id) });
+            return { ...dr, reportCount: cRes[0][0]?.n ?? 0 };
+        }));
+        return withCounts;
     }
     async getReportingChain(id) {
         const chain = [];
@@ -92,6 +96,46 @@ class PeopleService {
     async getEmploymentHistory(id) {
         const res = await this.db.query(`SELECT * FROM employment_event WHERE person = $id ORDER BY effective_date DESC`, { id: new surrealdb_1.StringRecordId(id) });
         return res[0];
+    }
+    async getPersonContext(id) {
+        const clean = (p) => p ? { ...p, id: p.id?.toString?.() ?? p.id } : null;
+        // Self
+        const selfRes = await this.db.query(`
+      SELECT *, org_unit.{name, type} AS org_info
+      FROM person WHERE id = $id
+    `, { id: new surrealdb_1.StringRecordId(id) });
+        const self = clean(selfRes[0][0]);
+        if (!self)
+            return null;
+        // Manager — via reports_to graph edge
+        const mgrRes = await this.db.query(`SELECT ->reports_to->person.{id, first_name, last_name, job_title, org_unit} AS m FROM person WHERE id = $id`, { id: new surrealdb_1.StringRecordId(id) });
+        const mgrArr = (mgrRes[0][0]?.m ?? []).map(clean);
+        const manager = mgrArr.length > 0 ? mgrArr[0] : null;
+        // Peers — others who share the same manager via graph edge (excluding self)
+        let peers = [];
+        if (manager?.id) {
+            const peersRes = await this.db.query(`SELECT <-reports_to<-person.{id, first_name, last_name, job_title} AS p FROM person WHERE id = $mgr`, { mgr: new surrealdb_1.StringRecordId(manager.id) });
+            const all = (peersRes[0][0]?.p ?? []).map(clean);
+            peers = all.filter((p) => p.id !== id && p.id !== self.id);
+        }
+        // Direct reports — via reports_to graph edge (self is the target)
+        const drRes = await this.db.query(`SELECT <-reports_to<-person.{id, first_name, last_name, job_title, org_unit, email, employee_id, employment_type} AS reports FROM person WHERE id = $id`, { id: new surrealdb_1.StringRecordId(id) });
+        const directReports = (drRes[0][0]?.reports ?? []).map(clean);
+        // Report count for each direct report (for expand button badge)
+        const drWithCounts = await Promise.all(directReports.map(async (dr) => {
+            const cRes = await this.db.query(`SELECT count(<-reports_to<-person) AS n FROM person WHERE id = $id`, { id: new surrealdb_1.StringRecordId(dr.id) });
+            const n = cRes[0][0]?.n ?? 0;
+            return { ...dr, reportCount: n };
+        }));
+        // Also get report count for self
+        const selfCountRes = await this.db.query(`SELECT count(<-reports_to<-person) AS n FROM person WHERE id = $id`, { id: new surrealdb_1.StringRecordId(id) });
+        const selfReportCount = selfCountRes[0][0]?.n ?? 0;
+        return {
+            self: { ...self, reportCount: selfReportCount },
+            manager,
+            peers,
+            directReports: drWithCounts
+        };
     }
     async getPermissions(id) {
         const res = await this.db.query(`SELECT ->has_role->role.permissions AS perms FROM person WHERE id = $id`, { id: new surrealdb_1.StringRecordId(id) });

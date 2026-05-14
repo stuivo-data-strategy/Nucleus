@@ -118,11 +118,25 @@ class _PolicyScreenState extends State<PolicyScreen> {
         api.get('/policies/thresholds'),
       ]);
 
-      final rulesData = (results[0]['data'] as List<dynamic>?)
+      final rulesRaw = (results[0]['data'] as List<dynamic>?)
               ?.map((e) => Map<String, dynamic>.from(e as Map))
               .where((r) => r['max_amount'] != null) // only spending-limit rules
               .toList() ??
           [];
+      // Deduplicate by category — keeps the most complete rule per category
+      // (the one with receipt_threshold, i.e. a proper spending-limit rule
+      // rather than a validation-only rule that acquired max_amount by mistake).
+      final bestByCategory = <String, Map<String, dynamic>>{};
+      for (final r in rulesRaw) {
+        final cat = (r['category'] ?? '').toString();
+        final existing = bestByCategory[cat];
+        if (existing == null ||
+            (existing['receipt_threshold'] == null &&
+                r['receipt_threshold'] != null)) {
+          bestByCategory[cat] = r;
+        }
+      }
+      final rulesData = bestByCategory.values.toList();
       final auditData = (results[1]['data'] as List<dynamic>?)
               ?.map((e) => Map<String, dynamic>.from(e as Map))
               .toList() ??

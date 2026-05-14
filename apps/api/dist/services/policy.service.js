@@ -7,10 +7,27 @@ class PolicyService {
     constructor(db) {
         this.db = db;
     }
+    // Safely serialise a SurrealDB record to a JSON string.
+    // Handles RecordId objects, BigInts, Decimals and other non-JSON-safe values.
+    safeStringify(obj) {
+        try {
+            return JSON.stringify(obj, (_key, value) => {
+                if (typeof value === 'bigint')
+                    return Number(value);
+                if (value !== null && typeof value === 'object' && typeof value.toJSON === 'function') {
+                    return value.toJSON();
+                }
+                return value;
+            });
+        }
+        catch {
+            return '{}';
+        }
+    }
     async validateClaim(claim) {
         const checks = [];
-        // 1. Fetch policy rule
-        const res = await this.db.query(`SELECT * FROM policy_rule WHERE category = $cat LIMIT 1`, { cat: claim.category });
+        // 1. Fetch the spending-limit policy rule (skip validation-only rules that lack max_amount)
+        const res = await this.db.query(`SELECT * FROM policy_rule WHERE category = $cat AND max_amount != NONE LIMIT 1`, { cat: claim.category });
         const arr = res[0];
         const rule = arr && arr.length > 0 ? arr[0] : null;
         if (!rule) {
@@ -140,7 +157,7 @@ class PolicyService {
         return {
             passed: fails === 0,
             timestamp: new Date().toISOString(),
-            rule_version: rule ? JSON.stringify(rule) : '{}',
+            rule_version: rule ? this.safeStringify(rule) : '{}',
             checks,
             summary: { total: checks.length, passed: passes, warnings: warns, failures: fails }
         };
@@ -160,17 +177,36 @@ class PolicyService {
     }
     async getAllPolicyRules() {
         const res = await this.db.query(`SELECT * FROM policy_rule ORDER BY category`);
-        return res[0];
+        const rules = res[0];
+        return rules.map(r => ({ ...r, id: r.id?.toString?.() ?? r.id }));
     }
     async updatePolicyRule(ruleId, updates, updatedBy) {
-        const curRes = await this.db.query(`SELECT * FROM policy_rule WHERE id = $id`, { id: new surrealdb_1.StringRecordId(ruleId) });
+        const curRes = await this.db.query(`SELECT * FROM ${ruleId}`);
         const curArr = curRes[0];
         if (!curArr || curArr.length === 0)
             throw new Error("Rule not found");
-        const oldRule = curArr[0];
+        const oldRule = { ...curArr[0], id: curArr[0].id?.toString?.() ?? curArr[0].id };
         const upRes = await this.db.query(`UPDATE ${ruleId} MERGE $data`, { data: updates });
         const upArr = upRes[0];
-        const newRule = upArr[0];
+        const newRule = { ...upArr[0], id: upArr[0].id?.toString?.() ?? upArr[0].id };
+        await this.logPolicyAudit('POLICY_CHANGE', 'admin_change', { previous: oldRule, updated: newRule, changes: updates }, updatedBy);
+        return newRule;
+    }
+    async updatePolicyRuleByCategory(category, updates, updatedBy) {
+        // Only target spending-limit rules (those with max_amount) to avoid updating
+        // validation-only rules that share the same category (e.g. group_meals).
+        const curRes = await this.db.query(`SELECT * FROM policy_rule WHERE category = $cat AND max_amount != NONE LIMIT 1`, { cat: category });
+        const curArr = curRes[0];
+        if (!curArr || curArr.length === 0)
+            throw new Error(`Policy rule not found for category: ${category}`);
+        const oldId = curArr[0].id?.toString?.() ?? String(curArr[0].id);
+        const oldRule = { ...curArr[0], id: oldId };
+        // Use the stringified record ID directly — e.g. "UPDATE policy_rule:meals MERGE $data"
+        await this.db.query(`UPDATE ${oldId} MERGE $data`, { data: updates });
+        const upRes = await this.db.query(`SELECT * FROM policy_rule WHERE category = $cat AND max_amount != NONE LIMIT 1`, { cat: category });
+        const upArr = upRes[0];
+        const newId = upArr[0].id?.toString?.() ?? String(upArr[0].id);
+        const newRule = { ...upArr[0], id: newId };
         await this.logPolicyAudit('POLICY_CHANGE', 'admin_change', { previous: oldRule, updated: newRule, changes: updates }, updatedBy);
         return newRule;
     }

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DEMO_USER = void 0;
 const connection_1 = require("./connection");
+const expense_service_1 = require("../services/expense.service");
 exports.DEMO_USER = 'person:sarah_chen';
 const firstNames = ["James", "John", "Robert", "Michael", "William", "David", "Richard", "Charles", "Joseph", "Thomas", "Christopher", "Daniel", "Paul", "Mark", "Donald", "George", "Kenneth", "Steven", "Edward", "Brian", "Ronald", "Anthony", "Kevin", "Jason", "Matthew", "Gary", "Timothy", "Jose", "Larry", "Jeffrey", "Frank", "Scott", "Eric", "Stephen", "Andrew", "Raymond", "Gregory", "Joshua", "Jerry", "Dennis"];
 const lastNames = ["Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Thompson", "Garcia", "Martinez", "Robinson", "Clark", "Rodriguez", "Lewis", "Lee", "Walker", "Hall", "Allen", "Young", "Hernandez", "King", "Wright", "Lopez", "Hill", "Scott", "Green", "Adams", "Baker", "Gonzalez", "Nelson", "Carter"];
@@ -44,7 +45,7 @@ async function seed() {
         { id: 'org_unit:corp_services', type: 'business_unit', code: 'BU-CS', name: 'Corporate Services', parent: 'org_unit:meridian', status: 'active', head: 'person:amara_okafor' },
         { id: 'org_unit:commercial', type: 'business_unit', code: 'BU-CM', name: 'Commercial', parent: 'org_unit:meridian', status: 'active' },
         // Divisions
-        { id: 'org_unit:ai_data', type: 'division', code: 'DIV-AID', name: 'AI & Data', parent: 'org_unit:tech_data', status: 'active', head: 'person:peter_blackwell' },
+        { id: 'org_unit:ai_data', type: 'division', code: 'DIV-AID', name: 'Digital Delivery', parent: 'org_unit:tech_data', status: 'active', head: 'person:peter_blackwell' },
         { id: 'org_unit:it_ops', type: 'division', code: 'DIV-ITO', name: 'IT Operations', parent: 'org_unit:tech_data', status: 'active' },
         { id: 'org_unit:sw_dev', type: 'division', code: 'DIV-SWD', name: 'Software Development', parent: 'org_unit:tech_data', status: 'active' },
         { id: 'org_unit:project_del', type: 'division', code: 'DIV-PRD', name: 'Project Delivery', parent: 'org_unit:ops', status: 'active' },
@@ -53,7 +54,7 @@ async function seed() {
         { id: 'org_unit:hr_div', type: 'division', code: 'DIV-HR', name: 'HR', parent: 'org_unit:corp_services', status: 'active' },
         { id: 'org_unit:bus_dev', type: 'division', code: 'DIV-BD', name: 'Business Development', parent: 'org_unit:commercial', status: 'active' },
         // Departments
-        { id: 'org_unit:data_analytics', type: 'department', code: 'DEP-DA', name: 'Data & Analytics', parent: 'org_unit:ai_data', status: 'active', head: 'person:james_morton' },
+        { id: 'org_unit:data_analytics', type: 'department', code: 'DEP-DA', name: 'Digital Delivery', parent: 'org_unit:ai_data', status: 'active', head: 'person:james_morton' },
         { id: 'org_unit:ai_engineering', type: 'department', code: 'DEP-AIE', name: 'AI Engineering', parent: 'org_unit:ai_data', status: 'active' },
         { id: 'org_unit:data_engineering', type: 'department', code: 'DEP-DE', name: 'Data Engineering', parent: 'org_unit:ai_data', status: 'active' },
         { id: 'org_unit:civil_eng', type: 'department', code: 'DEP-CIV', name: 'Civil Engineering', parent: 'org_unit:project_del', status: 'active' },
@@ -67,8 +68,8 @@ async function seed() {
     console.log("Seeding cost centres...");
     const ccs = [
         { id: 'cost_centre:cc1000', code: 'CC-1000', name: 'Technology & Data General', owner: 'person:richard_keane' },
-        { id: 'cost_centre:cc1010', code: 'CC-1010', name: 'AI & Data Division', parent: 'cost_centre:cc1000', owner: 'person:peter_blackwell' },
-        { id: 'cost_centre:cc1011', code: 'CC-1011', name: 'Data & Analytics', parent: 'cost_centre:cc1010', owner: 'person:james_morton' },
+        { id: 'cost_centre:cc1010', code: 'CC-1010', name: 'Digital Delivery Division', parent: 'cost_centre:cc1000', owner: 'person:peter_blackwell' },
+        { id: 'cost_centre:cc1011', code: 'CC-1011', name: 'Digital Delivery', parent: 'cost_centre:cc1010', owner: 'person:james_morton' },
         { id: 'cost_centre:cc1012', code: 'CC-1012', name: 'AI Engineering', parent: 'cost_centre:cc1010' },
         { id: 'cost_centre:cc2000', code: 'CC-2000', name: 'Operations General', owner: 'person:david_hargreaves' },
         { id: 'cost_centre:cc3000', code: 'CC-3000', name: 'Corporate Services General', owner: 'person:amara_okafor' },
@@ -77,12 +78,13 @@ async function seed() {
     for (const c of ccs)
         await db.query(`UPSERT ${c.id} MERGE $data`, { data: cleanData(c) });
     console.log(`Seeded ${ccs.length} cost centres.`);
+    console.log("Clearing existing people & positions...");
+    await db.query(`DELETE reports_to; DELETE holds_position; DELETE owns_budget; DELETE has_role; DELETE person; DELETE position;`);
     console.log("Seeding people & positions...");
     let empCounter = 1000;
     const positions = [];
     const edgeHolds = [];
     const edgeReports = [];
-    const edgeOwnsBudget = [];
     const addPerson = async (id, f, l, title, job_c, org_u, cc, manager) => {
         empCounter++;
         const posId = `position:pos_${empCounter}`;
@@ -128,10 +130,11 @@ async function seed() {
     await addPerson('person:amara_okafor', 'Amara', 'Okafor', 'CFO', 'job_classification:x3', 'org_unit:corp_services', 'cost_centre:cc3000', 'person:margaret_thornton');
     await addPerson('person:richard_keane', 'Richard', 'Keane', 'CTO', 'job_classification:x3', 'org_unit:tech_data', 'cost_centre:cc1000', 'person:margaret_thornton');
     // Tech & Data Leadership
-    await addPerson('person:peter_blackwell', 'Peter', 'Blackwell', 'Head of AI & Data', 'job_classification:m4', 'org_unit:ai_data', 'cost_centre:cc1010', 'person:richard_keane');
-    await addPerson('person:james_morton', 'James', 'Morton', 'Head of Data & Analytics', 'job_classification:m3', 'org_unit:data_analytics', 'cost_centre:cc1011', 'person:peter_blackwell');
+    await addPerson('person:peter_diciacca', 'Peter', 'DiCiacca', 'Global IT Director', 'job_classification:x3', 'org_unit:tech_data', 'cost_centre:cc1000', 'person:margaret_thornton');
+    await addPerson('person:peter_blackwell', 'Peter', 'Passaro', 'Global Director of AI and Data', 'job_classification:m4', 'org_unit:ai_data', 'cost_centre:cc1010', 'person:peter_diciacca');
+    await addPerson('person:james_morton', 'Stu', 'Morris', 'Head of Digital Delivery', 'job_classification:m3', 'org_unit:data_analytics', 'cost_centre:cc1011', 'person:peter_blackwell');
     // Specific required person
-    await addPerson(exports.DEMO_USER, 'Sarah', 'Chen', 'Senior Analyst', 'job_classification:t4', 'org_unit:data_analytics', 'cost_centre:cc1011', 'person:james_morton');
+    await addPerson(exports.DEMO_USER, 'Sarah', 'Chen', 'Senior Developer', 'job_classification:e4', 'org_unit:data_analytics', 'cost_centre:cc1011', 'person:james_morton');
     // Data & Analytics members
     for (let i = 0; i < 4; i++) {
         const fn = randomName();
@@ -188,12 +191,18 @@ async function seed() {
     console.log("Seeding Workflow Templates...");
     const wfs = [
         { id: 'workflow_template:expense_approval', name: 'expense_approval', module: 'expenses', status: 'active', steps: [
-                { order: 1, resolver: 'direct_manager', action: 'approve' },
-                { order: 2, resolver: 'cost_centre_owner', action: 'approve' },
-                { order: 3, resolver: 'specific_role', resolver_config: { role: 'finance_approver' }, action: 'approve' }
+                { order: 1, label: 'Direct Manager', resolver: 'direct_manager', action: 'approve' },
+                { order: 2, label: 'Cost Centre Owner', resolver: 'cost_centre_owner', action: 'approve', condition: { min_amount: 100 } },
+                { order: 3, label: 'Finance Head', resolver: 'role_based', role: 'finance_approver', action: 'approve', condition: { min_amount: 500 } }
             ] },
         { id: 'workflow_template:absence_request', name: 'absence_request', module: 'absence', status: 'active', steps: [
                 { order: 1, resolver: 'direct_manager', action: 'approve' }
+            ] },
+        { id: 'workflow_template:expense_approval_exception', name: 'expense_approval_exception', module: 'expenses', status: 'active', steps: [
+                { order: 1, label: 'Senior Manager (Exception)', resolver: 'skip_level_manager', action: 'approve' },
+                { order: 2, label: 'Line Manager', resolver: 'direct_manager', action: 'approve' },
+                { order: 3, label: 'Cost Centre Owner', resolver: 'cost_centre_owner', action: 'approve', condition: { min_amount: 100 } },
+                { order: 4, label: 'Finance', resolver: 'role_based', role: 'finance_approver', action: 'approve', condition: { min_amount: 500 } }
             ] }
     ];
     for (const wf of wfs)
@@ -210,16 +219,44 @@ async function seed() {
         { id: 'policy_rule:meals', category: 'meals', max_amount: 75, receipt_threshold: 15, description: 'Meals limit' },
         { id: 'policy_rule:travel', category: 'travel', max_amount: 250, receipt_threshold: 10, description: 'Travel limits including taxis and rail fares' },
         { id: 'policy_rule:accommodation', category: 'accommodation', max_amount: 200, receipt_threshold: 0, description: 'Hotel stay limits per night' },
-        { id: 'policy_rule:supplies', category: 'supplies', max_amount: 150, receipt_threshold: 20, description: 'Office supplies' }
+        { id: 'policy_rule:supplies', category: 'supplies', max_amount: 150, receipt_threshold: 20, description: 'Office supplies' },
+        // Group expense per-head limit (using same category but lower priority / specific check)
+        { id: 'policy_rule:group_meals', name: 'Group Meals — Per Head Limit', category: 'meals', field: 'amount_per_head', operator: 'lte', value: 75.00, severity: 'fail', message: 'Group meals must not exceed £75.00 per person' },
+        // Mileage rate rule
+        { id: 'policy_rule:mileage_rate', name: 'HMRC Mileage Rate 2025-26', category: 'mileage', field: 'mileage_rate', operator: 'lte', value: 0.45, severity: 'fail', message: 'Mileage rate must not exceed the HMRC approved rate of 45p/mile (25p above 10,000 miles)' }
     ];
     for (const pr of prules)
         await db.query(`UPSERT ${pr.id} MERGE $data`, { data: cleanData(pr) });
+    console.log("Seeding Mileage & Vehicles for Demo User...");
+    const vehicles = [
+        { id: 'vehicle:v1', registration: 'LD68 XBY', make: 'Volkswagen Golf', engine_cc: 1400, fuel_type: 'petrol', owner: exports.DEMO_USER },
+        { id: 'vehicle:v2', registration: 'EA71 KWT', make: 'Tesla Model 3', engine_cc: 0, fuel_type: 'electric', owner: exports.DEMO_USER }
+    ];
+    for (const v of vehicles)
+        await db.query(`UPSERT ${v.id} MERGE $data`, { data: cleanData(v) });
+    // Set relationships
+    await db.query(`RELATE ${exports.DEMO_USER}->owns_vehicle->vehicle:v1;`);
+    await db.query(`RELATE ${exports.DEMO_USER}->owns_vehicle->vehicle:v2;`);
+    const journeys = [
+        { id: 'saved_journey:j1', label: 'Home to Manchester Office', from_address: 'WA14 2DT', to_address: 'M2 3AW', distance_miles: 16.5, owner: exports.DEMO_USER },
+        { id: 'saved_journey:j2', label: 'Office to Client Site (Leeds)', from_address: 'M2 3AW', to_address: 'LS1 1UR', distance_miles: 44.2, owner: exports.DEMO_USER },
+        { id: 'saved_journey:j3', label: 'Home to London Office', from_address: 'WA14 2DT', to_address: 'EC2V 7RS', distance_miles: 198.5, owner: exports.DEMO_USER }
+    ];
+    for (const j of journeys)
+        await db.query(`UPSERT ${j.id} MERGE $data`, { data: cleanData(j) });
+    await db.query(`UPSERT mileage_summary:sarah_2025 MERGE { person: $p, tax_year: '2025-26', total_miles: 8750.0 };`, { p: exports.DEMO_USER });
+    console.log("Seeding Lisa Thornton (Expenses Auditor)...");
+    await addPerson('person:lisa_thornton', 'Lisa', 'Thornton', 'Expenses Officer', 'job_classification:t3', 'org_unit:finance_div', 'cost_centre:cc3000', 'person:amara_okafor');
+    console.log("Seeding Daniel Frost (Management Accountant / VAT Officer)...");
+    await addPerson('person:daniel_frost', 'Daniel', 'Frost', 'Management Accountant', 'job_classification:t3', 'org_unit:finance_div', 'cost_centre:cc3000', 'person:amara_okafor');
     console.log("Seeding RBAC roles...");
     const roles = [
         { id: 'role:employee', name: 'employee', permissions: ['expenses:create:own', 'expenses:read:own', 'org:read:all', 'people:read:basic'] },
         { id: 'role:manager', name: 'manager', permissions: ['expenses:approve:team', 'people:read:team'] },
         { id: 'role:hr_admin', name: 'hr_admin', permissions: ['people:read:all', 'people:write:all'] },
         { id: 'role:finance_approver', name: 'finance_approver', permissions: ['expenses:approve:all', 'expenses:read:all'] },
+        { id: 'role:expenses_auditor', name: 'expenses_auditor', permissions: ['expenses:audit:all', 'expenses:read:all'] },
+        { id: 'role:vat_officer', name: 'vat_officer', permissions: ['vat:classify:all', 'vat:read:all', 'expenses:read:all'] },
         { id: 'role:system_admin', name: 'system_admin', permissions: ['*:*:*'] }
     ];
     for (const r of roles)
@@ -229,7 +266,67 @@ async function seed() {
     await db.query(`RELATE person:james_morton->has_role->role:manager;`);
     await db.query(`RELATE person:margaret_thornton->has_role->role:system_admin;`);
     await db.query(`RELATE person:amara_okafor->has_role->role:finance_approver;`);
+    await db.query(`RELATE person:lisa_thornton->has_role->role:expenses_auditor;`);
+    await db.query(`RELATE person:daniel_frost->has_role->role:vat_officer;`);
+    console.log("Seeding Sample Expense Claims (via service)...");
+    await db.query(`DELETE workflow_action; DELETE workflow_instance; DELETE policy_audit; DELETE expense_claim;`);
+    const expSvc = new expense_service_1.ExpenseService(db);
+    // Claims to submit through the proper service pipeline
+    const claimDefs = [
+        { claimant: exports.DEMO_USER, body: { category: 'meals', amount: 42.50, date: '2025-04-15', has_receipt: true, description: 'Client lunch — Project Alpha kickoff', currency: 'GBP' }, then: 'approve' },
+        { claimant: exports.DEMO_USER, body: { category: 'travel', amount: 186.00, date: '2025-04-22', has_receipt: true, description: 'Train to London — stakeholder workshop', currency: 'GBP' }, then: 'approve' },
+        { claimant: exports.DEMO_USER, body: { category: 'accommodation', amount: 165.00, date: '2025-05-02', has_receipt: true, description: 'Premier Inn Manchester — late project session', currency: 'GBP' }, then: 'pending' },
+        { claimant: exports.DEMO_USER, body: { category: 'meals', amount: 89.00, date: '2025-04-28', has_receipt: true, description: 'Team dinner — sprint completion', currency: 'GBP', exception_requested: true, exception_justification: 'Group dinner for 4 team members after sprint delivery' }, then: 'query' },
+        { claimant: exports.DEMO_USER, body: { category: 'meals', amount: 28.50, date: '2025-05-08', has_receipt: true, description: 'Working lunch with vendor', currency: 'GBP' }, then: 'pending' },
+        { claimant: exports.DEMO_USER, body: { category: 'office_supplies', amount: 67.99, date: '2025-05-01', has_receipt: true, description: 'USB-C hub and cables for home office', currency: 'GBP' }, then: 'pending' },
+    ];
+    for (const def of claimDefs) {
+        try {
+            const result = await expSvc.submitClaim(def.claimant, def.body);
+            const claimId = result.claim.id;
+            const workflowId = result.workflow?.id?.toString ? result.workflow.id.toString() : result.workflow?.id;
+            if (!workflowId) {
+                console.log(`  ${def.body.description} — submitted (no workflow)`);
+                continue;
+            }
+            // Find the first step's approver to action as them
+            const steps = result.workflow?.steps || [];
+            const firstApprover = steps[0]?.approver_id;
+            if (def.then === 'approve' && firstApprover) {
+                // Approve through all steps
+                for (const step of steps) {
+                    try {
+                        await expSvc.processAction(claimId, step.approver_id, 'approve', 'Approved');
+                    }
+                    catch {
+                        break;
+                    }
+                }
+                console.log(`  ${def.body.description} — approved`);
+            }
+            else if (def.then === 'query' && firstApprover) {
+                await expSvc.processAction(claimId, firstApprover, 'query', 'Was this just your team or did it include external guests?');
+                console.log(`  ${def.body.description} — queried`);
+            }
+            else {
+                console.log(`  ${def.body.description} — pending approval`);
+            }
+        }
+        catch (err) {
+            console.error(`  FAILED: ${def.body.description} — ${err.message}`);
+        }
+    }
+    // Count what was created
+    const claimCount = (await db.query(`SELECT count() FROM expense_claim GROUP ALL`))[0]?.[0]?.count ?? 0;
+    const wfCount = (await db.query(`SELECT count() FROM workflow_instance GROUP ALL`))[0]?.[0]?.count ?? 0;
+    const auditCount = (await db.query(`SELECT count() FROM policy_audit GROUP ALL`))[0]?.[0]?.count ?? 0;
+    console.log(`  Created ${claimCount} claims, ${wfCount} workflow instances, ${auditCount} policy audit records.`);
     console.log("Seeding Complete!");
     await connection_1.dbConnection.close();
 }
-seed().catch(console.error);
+// Only run when executed directly: pnpm db:seed
+const isMain = process.argv[1]?.replace(/\\/g, '/').endsWith('db/seed.ts') ||
+    process.argv[1]?.replace(/\\/g, '/').endsWith('db/seed.js');
+if (isMain) {
+    seed().catch(console.error);
+}
